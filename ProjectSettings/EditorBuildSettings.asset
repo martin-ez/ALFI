@@ -5,10 +5,7 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
-    path: 
-    guid: 00000000000000000000000000000000
   - enabled: 1
-    path: Assets/Scenes/Hologram.unity
-    guid: a65836cbd41fe964fb165efdaafedb6a
+    path: Assets/Examples/MayanTemple/Main.unity
+    guid: 91b680e888f829549af1daaa4ebe2224
   m_configObjects: {}
