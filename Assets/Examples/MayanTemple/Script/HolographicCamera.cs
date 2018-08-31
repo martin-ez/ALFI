@@ -16,9 +16,10 @@ public class HolographicCamera : MonoBehaviour
     public float nearPlane = 0.05f;
     public float farPlane = 100f;
 
-    public float MultiplyX = 1f;
-    public float MultiplyY = 1f;
-    public float MultiplyZ = 1f;
+    public float screenHeightinMM = 480f;
+    public float movementScaling = 1.0f;
+    public bool kinectAbove = false;
+
     public float offsetX;
     public float offsetY;
     public float offsetZ;
@@ -59,18 +60,6 @@ public class HolographicCamera : MonoBehaviour
             keyCooldown = Time.time + 2;
         }
 
-        if (Input.GetKey(KeyCode.X) && Time.time > keyCooldown)
-        {
-            MultiplyX = -corners[0].position.x / transform.position.x;
-            keyCooldown = Time.time + 2;
-        }
-
-        if (Input.GetKey(KeyCode.Y) && Time.time > keyCooldown)
-        {
-            MultiplyY = corners[0].position.y / transform.position.y;
-            keyCooldown = Time.time + 2;
-        }
-
         if (Input.GetKey(KeyCode.Escape))
         {
             Application.Quit();
@@ -105,11 +94,16 @@ public class HolographicCamera : MonoBehaviour
                         Windows.Kinect.Joint head = _Data[0].Joints[JointType.Head];
                         Vector3 jointPos = GetVector3FromJoint(head);
 
-                        float NewOffsetX = jointPos.x * MultiplyX + offsetX;
-                        float NewOffsetY = jointPos.y * MultiplyY + offsetY;
-                        float NewOffsetZ = jointPos.z * MultiplyZ + offsetZ;
+                        float headZ = (jointPos.z * movementScaling + offsetZ);
+                        float headX = (-jointPos.x * movementScaling + offsetX);
+                        float headY = (jointPos.y * movementScaling + offsetY);
+                        if (kinectAbove)
+                        {
+                            headY = -headY;
+                        }
 
-                        transform.position = new Vector3(NewOffsetX, NewOffsetY, NewOffsetZ);
+                        transform.position = new Vector3(headX, headY, headZ);
+                        transform.LookAt(new Vector3(headX, headY, 0), Vector3.down);
 
                         break;
                     }
@@ -143,7 +137,6 @@ public class HolographicCamera : MonoBehaviour
             Vector3 vd = pd - pe; // from pe to pd
 
             float n = -target.InverseTransformPoint(theCam.transform.position).z; // distance to the near clip plane (screen)
-            float f = theCam.farClipPlane; // distance of far clipping plane
             float d = Vector3.Dot(va, vn); // distance from eye to screen
             float left = Vector3.Dot(vr, va) * n / d; // distance to left screen edge from the 'center'
             float right = Vector3.Dot(vr, vb) * n / d; // distance to right screen edge from 'center'
@@ -157,8 +150,8 @@ public class HolographicCamera : MonoBehaviour
             float aspectRatio = screenWidth / screenHeight;
             float left = ((-0.5f * aspectRatio + xHead) / zHead) * nearPlane;
             float right = ((0.5f * aspectRatio + xHead) / zHead) * nearPlane;
-            float top = ((0.5f + yHead) / zHead) * nearPlane;
-            float bottom = ((-0.5f + yHead) / zHead) * nearPlane;*/
+            float top = ((-0.5f + yHead) / zHead) * nearPlane;
+            float bottom = ((0.5f + yHead) / zHead) * nearPlane;*/
 
             theCam.projectionMatrix = PerspectiveOffCenter(left, right, bottom, top, -n, farPlane);
 
