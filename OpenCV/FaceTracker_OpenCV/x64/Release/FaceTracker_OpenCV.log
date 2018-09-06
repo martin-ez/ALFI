@@ -1,8 +1,0 @@
-﻿  FaceTracker.cpp
-d:\_code\kinect\alfi\opencv\facetracker_opencv\facetracker.cpp(35): warning C4244: '=': conversión de 'double' a 'int'; posible pérdida de datos
-d:\_code\kinect\alfi\opencv\facetracker_opencv\facetracker.cpp(36): warning C4244: '=': conversión de 'double' a 'int'; posible pérdida de datos
-     Creando biblioteca D:\_Code\Kinect\ALFI\x64\Release\FaceTracker_OpenCV.lib y objeto D:\_Code\Kinect\ALFI\x64\Release\FaceTracker_OpenCV.exp
-  Generando código
-  All 70 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
-  Generación de código finalizada
-  FaceTracker_OpenCV.vcxproj -> D:\_Code\Kinect\ALFI\x64\Release\FaceTracker_OpenCV.dll

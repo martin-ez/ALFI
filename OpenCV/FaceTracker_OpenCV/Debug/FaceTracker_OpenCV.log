@@ -1,4 +1,0 @@
-﻿  FaceTracker.cpp
-d:\_code\kinect\alfi\opencv\facetracker_opencv\facetracker.cpp(35): warning C4244: '=': conversión de 'double' a 'int'; posible pérdida de datos
-d:\_code\kinect\alfi\opencv\facetracker_opencv\facetracker.cpp(36): warning C4244: '=': conversión de 'double' a 'int'; posible pérdida de datos
-LINK : fatal error LNK1104: no se puede abrir el archivo 'opencv_core310.lib'
