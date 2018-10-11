@@ -1,0 +1,9 @@
+﻿<Application x:Class="DataRecollection.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:DataRecollection"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <FontFamily x:Key="Monserrat">pack:/Assets/Fonts/#Monserrat</FontFamily>
+    </Application.Resources>
+</Application>

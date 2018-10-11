@@ -1,0 +1,114 @@
+﻿<Window x:Class="DataRecollection.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:k="http://schemas.microsoft.com/kinect/2014"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        Title="Data Recollection" 
+        mc:Ignorable="d"
+        d:DesignWidth="1280"
+        d:DesignHeight="720"
+        MinWidth="500"
+        MinHeight="700"
+        Closing="MainWindow_Closing"
+        WindowState="Normal"
+        WindowStyle="ToolWindow">
+    <Window.Resources>
+        <LinearGradientBrush x:Key="OrangeGradientBrush" StartPoint="0,1" EndPoint="1.0,0">
+            <GradientStop Color="#d52941" Offset="0.0"/>
+            <GradientStop Color="#e45f42" Offset="0.25"/>
+            <GradientStop Color="#ee894c" Offset="0.5"/>
+            <GradientStop Color="#f6b061" Offset="0.75"/>
+            <GradientStop Color="#fcd581" Offset="1.0"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="BlueGradientBrush" StartPoint="0,1" EndPoint="1,0">
+            <GradientStop Color="#1f719b" Offset="0.0"/>
+            <GradientStop Color="#238aad" Offset="0.25"/>
+            <GradientStop Color="#33a3bc" Offset="0.5"/>
+            <GradientStop Color="#4cbcc9" Offset="0.75"/>
+            <GradientStop Color="#6bd5d3" Offset="1.0"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="BGGradientBrush" StartPoint="0,1" EndPoint="1,0">
+            <GradientStop Color="#1f719b" Offset="0.0"/>
+            <GradientStop Color="#238aad" Offset="0.25"/>
+            <GradientStop Color="#33a3bc" Offset="0.5"/>
+            <GradientStop Color="#4cbcc9" Offset="0.75"/>
+            <GradientStop Color="#6bd5d3" Offset="1.0"/>
+        </LinearGradientBrush>
+    </Window.Resources>
+    <k:KinectRegion x:Name="kinectRegion">
+        <Grid Margin="10 0 10 0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="200" />
+                <RowDefinition Height="30" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="30"/>
+            </Grid.ColumnDefinitions>
+            <Canvas Name="BGCanvas"
+                Grid.Column="0" Grid.ColumnSpan="4" Grid.Row="0" Grid.RowSpan="4"
+                Background="{StaticResource BGGradientBrush}"/>
+            <TextBlock Name="MainLabel"
+                   Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2"
+                   FontSize="92" FontWeight="Regular" Foreground="#FFF"
+                   TextAlignment="Center"
+                   VerticalAlignment="Center" HorizontalAlignment="Center"
+                   TextWrapping="Wrap" FontFamily="{StaticResource Monserrat}">
+                ¿Quieres ayudar a crear un algoritmo de identificación facial?
+            </TextBlock>
+            <Ellipse Name="Circle" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2"
+                     Width="200" Height="200"
+                     VerticalAlignment="Bottom" HorizontalAlignment="Left"
+                     Fill="#423740" Visibility="Hidden"/>
+            <TextBlock Name="SmallLabel" Visibility="Hidden"
+                   Grid.Column="1" Grid.Row="2"
+                   FontSize="32" FontWeight="Regular" Foreground="#FFF"
+                   TextAlignment="Justify"
+                   VerticalAlignment="Center" HorizontalAlignment="Center"
+                   TextWrapping="Wrap" FontFamily="{StaticResource Monserrat}">
+                Levanta tu mano y presiona el boton para empezar.
+            </TextBlock>
+
+            <Button Name="StartButton" Click="OnStartButton"
+                Visibility="Hidden"
+                Grid.Column="2" Grid.Row="2"
+                Height="150" Width="350"
+                Background="Transparent" BorderBrush="Transparent" Padding="0"
+                VerticalAlignment="Center" HorizontalAlignment="Center">
+                <Path Name="ButtonPath" Height="150" Width="350" Fill="{StaticResource BlueGradientBrush}">
+                    <Path.Data>
+                        <PathGeometry>
+                            <PathGeometry.Figures>
+                                <PathFigure StartPoint="80,10">
+                                    <PathFigure.Segments>
+                                        <LineSegment Point="270,10" />
+                                        <ArcSegment Point="275,145" Size="1,1" IsLargeArc="True" SweepDirection="Clockwise" />
+                                        <LineSegment Point="80, 145" />
+                                        <ArcSegment Point="80,10" Size="1,1" IsLargeArc="True" SweepDirection="Clockwise" />
+                                    </PathFigure.Segments>
+                                </PathFigure>
+                            </PathGeometry.Figures>
+                        </PathGeometry>
+                    </Path.Data>
+                </Path>
+            </Button>
+            <TextBlock Name="ButtonLabel" FontSize="52" FontWeight="Light" FontFamily="{StaticResource Monserrat}"
+                       Foreground="#FFF" Visibility="Hidden"
+                       VerticalAlignment="Center" HorizontalAlignment="Center"
+                       Grid.Column="2" Grid.Row="2"> Empezar</TextBlock>
+            <Image Name="VideoCapture" Visibility="Hidden"
+                Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2"
+                HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                Source="{Binding ColorImageSource}" Stretch="Uniform" />
+            <Image Name="IndexCapture" Visibility="Visible"
+                Grid.Column="3" Grid.Row="3"
+                HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                Source="{Binding IndexImageSource}" Stretch="Uniform" />
+        </Grid>
+    </k:KinectRegion>
+</Window>
