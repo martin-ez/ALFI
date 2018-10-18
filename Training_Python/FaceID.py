@@ -2,12 +2,14 @@ from tensorflow.keras.models import Sequential, Model
 from tensorflow.keras.layers import Dense, Activation, Flatten, Dropout, Lambda, ELU, concatenate, GlobalAveragePooling2D, Input, BatchNormalization, SeparableConv2D, Subtract, concatenate
 from tensorflow.keras.activations import relu, softmax
 from tensorflow.keras.layers import Convolution2D, MaxPooling2D, AveragePooling2D
-from tensorflow.keras.optimizers import Adam, RMSprop, SGD
+from tensorflow.keras.optimizers import RMSprop, SGD
+from tensorflow.train import AdamOptimizer as Adam
 from tensorflow.keras.regularizers import l2
+from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras import backend as K
 import numpy as np
-from SampleGenerator import sample
-import csv
+from SampleGenerator import sample, sample_dr, sample_both
+import csv, os
 
 def euclidean_distance(inputs):
     assert len(inputs) == 2, \
@@ -77,7 +79,7 @@ def faceIDNet():
 
     model_final = Model(inputs = [im_in1, im_in2], outputs = lambda_merge)
 
-    adam = Adam(lr=0.001)
+    adam = Adam()
 
     sgd = SGD(lr=0.001, momentum=0.9)
 
@@ -123,30 +125,36 @@ class FaceID:
 
     def __init__(self):
         self.model = faceIDNet()
-        self.outputs = None
 
-    def train(self, epochs, log_steps):
-        with open('train_log.csv', mode='w') as log:
-            log = csv.writer(log, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-
-            min_loss = 1.
-            gen = generator(16)
-            val_gen = val_generator(8)
-            e = 0
-            while e<epochs:
-                self.model.fit_generator(gen, epochs=log_steps, steps_per_epoch=30)
-                lossTrain = self.model.evaluate_generator(gen, steps=30)
-                lossVal = self.model.evaluate_generator(val_gen, steps=30, verbose=1)
-                print('* Epoch: '+str(e))
-                print('* - Loss train: '+str(lossTrain))
-                print('* - Loss val: '+str(lossVal))
-                log.writerow([e, lossTrain, lossVal])
-                if (lossVal < min_loss):
-                    min_loss = lossVal
-                    print('* + Best result so far. Saving model.')
-                    self.model.save('faceIDModel_save.h5')
-                e=e+log_steps
+    def train(self, epochs, verbose=True):
+        gen = generator(24)
+        val_gen = val_generator(8)
+        cp_callback = ModelCheckpoint(os.path.join('saved_models','faceID_weights'), save_weights_only=True)
+        if verbose:
+            with open('train_log.csv', mode='w') as log:
+                log = csv.writer(log, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                e = 0
+                while e<epochs:
+                    self.model.fit_generator(gen, epochs=1, steps_per_epoch=30, callbacks=[cp_callback])
+                    lossTrain = self.model.evaluate_generator(gen, steps=30)
+                    lossVal = self.model.evaluate_generator(val_gen, steps=30, verbose=1)
+                    print('* Epoch: '+str(e))
+                    print('* - Loss train: '+str(lossTrain))
+                    print('* - Loss val: '+str(lossVal))
+                    log.writerow([e, lossTrain, lossVal])
+                    e=e+1
+        else:
+            self.model.fit_generator(gen, steps_per_epoch=30, epochs=epochs, validation_data = val_gen, validation_steps=20, callbacks=[cp_callback])
+            lossTrain = self.model.evaluate_generator(gen, steps=30)
+            lossVal = self.model.evaluate_generator(val_gen, steps=30)
+            print('* - Loss train: '+str(lossTrain))
+            print('* - Loss val: '+str(lossVal))
 
     def predict(self, inputs, threshold=0.2):
+        inputs = [inputs[0,:].reshape((1,200,200,4)), inputs[1,:].reshape((1,200,200,4))]
         out = self.model.predict(inputs)
         return (out <= threshold)
+
+    def load(self, path):
+        self.model.load_weights(path)
+        print('--- Weights loaded ---')
