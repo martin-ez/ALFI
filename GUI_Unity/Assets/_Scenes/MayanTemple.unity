@@ -598,6 +598,46 @@ Prefab:
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9c63609cac979ab48a58e4b4268d3206, type: 3}
   m_IsPrefabAsset: 0
+--- !u!1 &26209236
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 26209238}
+  - component: {fileID: 26209237}
+  m_Layer: 0
+  m_Name: KinectManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &26209237
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 26209236}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 703be03adbeaf34459cf820fb9f6db50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &26209238
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 26209236}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.00000011920929, z: -3.0000002}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &29707639 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400000, guid: 6ea0b2630c121e54182b7d26e59f8faa,
@@ -2049,7 +2089,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 104615831}
-  - component: {fileID: 104615832}
   m_Layer: 0
   m_Name: Temple
   m_TagString: Untagged
@@ -2076,18 +2115,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: -50, z: 0}
---- !u!114 &104615832
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 104615830}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c80b6051c7cdd264cb706b1c888cc326, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  speed: 0
 --- !u!4 &105994966 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400000, guid: 9c63609cac979ab48a58e4b4268d3206,
