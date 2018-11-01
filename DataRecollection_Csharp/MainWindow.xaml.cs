@@ -139,8 +139,6 @@ namespace DataRecollection
             else if (stage == CaptureStage.Demo)
             {
                 stage = CaptureStage.ImageCaptures;
-                capture.NewSubject();
-                currentCapture = 0;
                 StartButton.Visibility = Visibility.Collapsed;
                 ButtonLabel.Visibility = Visibility.Collapsed;
                 BottomPanel.Visibility = Visibility.Collapsed;
