@@ -15,6 +15,7 @@ namespace DataRecollection
     using DataRecollection.Source;
     using Microsoft.Kinect.Wpf.Controls;
     using DataRecollection.Animations;
+    using System.Windows.Controls;
 
     public partial class MainWindow : Window
     {
@@ -33,6 +34,8 @@ namespace DataRecollection
             Idle,
             Tracking,
             Agreement,
+            Alignment,
+            Demo,
             ImageCaptures,
             AudioCapture,
             End
@@ -113,19 +116,38 @@ namespace DataRecollection
             }
             else if (stage == CaptureStage.Agreement)
             {
+                stage = CaptureStage.Alignment;
+                SmallLabel.Visibility = Visibility.Collapsed;
+                StartButton.SetValue(Grid.RowProperty, 2);
+                ButtonLabel.SetValue(Grid.RowProperty, 2);
+                ButtonLabel.Text = "Continuar";
+                BottomPanel.Visibility = Visibility.Visible;
+                BottomPanelText.Visibility = Visibility.Visible;
+                VideoCapture.Visibility = Visibility.Visible;
+                Template.Visibility = Visibility.Visible;
+                MainLabel.Visibility = Visibility.Collapsed;
+            }
+            else if (stage == CaptureStage.Alignment)
+            {
+                stage = CaptureStage.Demo;
+                capture.NewSubject();
+                CaptureData(0);
+                currentCapture = 1;
+                Template.Visibility = Visibility.Collapsed;
+                BottomPanelText.Text = "Imagenes de guia apareceran en la pantalla, por cada una intenta imitar la orientación de la cabeza mostrada en la imagen. Presiona continuar para empezar las capturas.";
+            }
+            else if (stage == CaptureStage.Demo)
+            {
                 stage = CaptureStage.ImageCaptures;
                 capture.NewSubject();
                 currentCapture = 0;
                 StartButton.Visibility = Visibility.Collapsed;
                 ButtonLabel.Visibility = Visibility.Collapsed;
-                SmallLabel.Visibility = Visibility.Collapsed;
-                VideoCapture.Visibility = Visibility.Visible;
-                Circle.Visibility = Visibility.Visible;
-                Circle.HorizontalAlignment = HorizontalAlignment.Left;
-                MainLabel.Text = "Gira tu cabeza hacia la dirección del punto";
-                MainLabel.VerticalAlignment = VerticalAlignment.Top;
-                MainLabel.FontSize = 82;
-                Task.Delay(4000).ContinueWith(t => NextCapture());
+                BottomPanel.Visibility = Visibility.Collapsed;
+                BottomPanelText.Visibility = Visibility.Collapsed;
+                ImgReference.Source = (ImageSource) FindResource("Ref_1");
+                ImgReference.Visibility = Visibility.Visible;
+                Task.Delay(3000).ContinueWith(t => NextCapture());
             }
         }
 
@@ -133,49 +155,39 @@ namespace DataRecollection
         {
             this.Dispatcher.Invoke(() =>
             {
-                if (currentCapture < 3) CaptureData(currentCapture);
+                if (currentCapture < 9) CaptureData(currentCapture);
 
                 currentCapture += 1;
-                if (currentCapture == 1 && stage == CaptureStage.ImageCaptures)
+                if (currentCapture < 9 && stage == CaptureStage.ImageCaptures)
                 {
-                    Circle.HorizontalAlignment = HorizontalAlignment.Center;
-                    Task.Delay(2000).ContinueWith(t => NextCapture());
+                    ImgReference.Source = (ImageSource)FindResource("Ref_"+currentCapture);
+                    Task.Delay(3000).ContinueWith(t => NextCapture());
                 }
-                else if (currentCapture == 2 && stage == CaptureStage.ImageCaptures)
-                {
-                    Circle.HorizontalAlignment = HorizontalAlignment.Right;
-                    Task.Delay(2000).ContinueWith(t => NextCapture());
-                }
-                else if (currentCapture == 3 && stage == CaptureStage.ImageCaptures)
+                else if (currentCapture == 9 && stage == CaptureStage.ImageCaptures)
                 {
                     stage = CaptureStage.AudioCapture;
                     capture.StartAudioRecording("Name");
-                    Circle.Visibility = Visibility.Collapsed;
+                    VideoCapture.Visibility = Visibility.Collapsed;
+                    ImgReference.Visibility = Visibility.Collapsed;
+                    MainLabel.Visibility = Visibility.Visible;
                     MainLabel.Text = "Por favor di tu nombre.";
                     MainLabel.VerticalAlignment = VerticalAlignment.Center;
-                    Task.Delay(5000).ContinueWith(t => NextCapture());
+                    Task.Delay(7000).ContinueWith(t => NextCapture());
                 }
-                else if (currentCapture == 4 && stage == CaptureStage.AudioCapture)
+                else if (currentCapture == 10 && stage == CaptureStage.AudioCapture)
                 {
                     capture.EndAudioRecording();
                     capture.StartAudioRecording("Email");
-                    Circle.Visibility = Visibility.Collapsed;
                     MainLabel.Text = "Di tu correo electrónico si deseas ser contactado con información y avances del proyecto.";
                     Task.Delay(7000).ContinueWith(t => NextCapture());
                 }
-                else if (stage == CaptureStage.AudioCapture)
+                else if (currentCapture == 11 && stage == CaptureStage.AudioCapture)
                 {
                     stage = CaptureStage.End;
                     capture.EndAudioRecording();
                     ButtonLabel.Text = "Empezar";
                     SmallLabel.Text = "Levanta tu mano y presiona el boton para empezar.";
                     MainLabel.Text = "Muchas gracias por tu participación!";
-                    MainLabel.VerticalAlignment = VerticalAlignment.Center;
-                    MainLabel.FontSize = 142;
-                    VideoCapture.Visibility = Visibility.Collapsed;
-                    SmallLabel.Visibility = Visibility.Collapsed;
-                    StartButton.Visibility = Visibility.Collapsed;
-                    ButtonLabel.Visibility = Visibility.Collapsed;
                 }
             });
         }
@@ -218,15 +230,19 @@ namespace DataRecollection
         private void PersonLeaveAnimation()
         {
             ButtonLabel.Text = "Empezar";
-            SmallLabel.Text = "Levanta tu mano y presiona el boton para empezar.";
-            MainLabel.Text = "¿Quieres ayudar a crear un algoritmo de identificación facial?";
-            MainLabel.VerticalAlignment = VerticalAlignment.Center;
-            MainLabel.FontSize = 92;
-            VideoCapture.Visibility = Visibility.Collapsed;
-            SmallLabel.Visibility = Visibility.Collapsed;
-            StartButton.Visibility = Visibility.Collapsed;
+            ButtonLabel.SetValue(Grid.RowProperty, 3);
             ButtonLabel.Visibility = Visibility.Collapsed;
-            Circle.Visibility = Visibility.Collapsed;
+            StartButton.SetValue(Grid.RowProperty, 3);
+            StartButton.Visibility = Visibility.Collapsed;
+            BottomPanel.Visibility = Visibility.Collapsed;
+            BottomPanelText.Visibility = Visibility.Collapsed;
+            BottomPanelText.Text = "Ubícate para que tu cabeza se alinee con la imagen. Presiona continuar cuando hayas terminado.";
+            SmallLabel.Text = "Levanta tu mano y presiona el boton para empezar.";
+            SmallLabel.Visibility = Visibility.Collapsed;
+            MainLabel.Text = "¿Quieres ayudar a crear un algoritmo de identificación facial?";
+            MainLabel.Visibility = Visibility.Visible;
+            VideoCapture.Visibility = Visibility.Collapsed;
+            ImgReference.Visibility = Visibility.Collapsed;
 
             string[] fromGradient = { "#ffd52941", "#ffe45f42", "#ffee894c", "#fff6b061", "#fffcd581" };
             string[] toGradient = { "#ff1f719b", "#ff238aad", "#ff33a3bc", "#ff4cbcc9", "#ff6bd5d3" };
@@ -252,24 +268,13 @@ namespace DataRecollection
 
         private void CaptureData(int captureNumber)
         {
+            Rect irRect = kinect.GetInfraredRect();
+
             capture.CaptureImage(kinect.GetBitmap(KinectManager.BitmapType.Color), "color", captureNumber);
             capture.CaptureImage(kinect.GetBitmap(KinectManager.BitmapType.Depth), "depth", captureNumber);
+            capture.CaptureData(kinect.GetData(KinectManager.BitmapType.Depth), "depth", captureNumber, (int)irRect.Width, (int)irRect.Height);
             capture.CaptureImage(kinect.GetBitmap(KinectManager.BitmapType.Infrared), "infrared", captureNumber);
             capture.CaptureImage(kinect.GetBitmap(KinectManager.BitmapType.BodyIndex), "index", captureNumber);
-
-            var mesh = kinect.GetMesh();
-            var meshIndices = kinect.GetMeshIndices();
-            var faceResults = kinect.GetTrackedFaceData();
-
-            if (mesh != null && mesh.Count > 0)
-            {
-                capture.CaptureFaceMesh(mesh, meshIndices, captureNumber);
-            }
-
-            if (faceResults != null)
-            {
-                capture.WriteCaptureInfo(faceResults, captureNumber);
-            }
         }
     }
 }

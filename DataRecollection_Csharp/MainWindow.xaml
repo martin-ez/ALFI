@@ -37,46 +37,79 @@
         </LinearGradientBrush>
     </Window.Resources>
     <k:KinectRegion x:Name="kinectRegion">
-        <Grid Margin="10 0 10 0">
+        <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="30" />
                 <RowDefinition Height="*" />
-                <RowDefinition Height="200" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
                 <RowDefinition Height="30" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="30"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="30"/>
             </Grid.ColumnDefinitions>
             <Canvas Name="BGCanvas"
-                Grid.Column="0" Grid.ColumnSpan="4" Grid.Row="0" Grid.RowSpan="4"
+                Grid.Column="0" Grid.ColumnSpan="6" Grid.Row="0" Grid.RowSpan="6"
                 Background="{StaticResource BGGradientBrush}"/>
             <TextBlock Name="MainLabel"
-                   Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2"
+                   Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="4" Grid.RowSpan="2"
                    FontSize="92" FontWeight="Regular" Foreground="#FFF"
                    TextAlignment="Center"
                    VerticalAlignment="Center" HorizontalAlignment="Center"
                    TextWrapping="Wrap" FontFamily="{StaticResource Monserrat}">
                 ¿Quieres ayudar a crear un algoritmo de identificación facial?
             </TextBlock>
-            <Ellipse Name="Circle" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2"
-                     Width="200" Height="200"
-                     VerticalAlignment="Bottom" HorizontalAlignment="Left"
-                     Fill="#423740" Visibility="Hidden"/>
             <TextBlock Name="SmallLabel" Visibility="Hidden"
-                   Grid.Column="1" Grid.Row="2"
+                   Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="2"
                    FontSize="32" FontWeight="Regular" Foreground="#FFF"
                    TextAlignment="Justify"
                    VerticalAlignment="Center" HorizontalAlignment="Center"
                    TextWrapping="Wrap" FontFamily="{StaticResource Monserrat}">
                 Levanta tu mano y presiona el boton para empezar.
             </TextBlock>
-
+            <Image Name="IndexCapture" Visibility="Visible"
+                Grid.Column="6" Grid.Row="6"
+                HorizontalAlignment="Center" VerticalAlignment="Top"
+                Source="{Binding IndexImageSource}" Stretch="Uniform" />
+            <Image Name="VideoCapture" Visibility="Hidden"
+                Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="4" Grid.RowSpan="3"
+                HorizontalAlignment="Center" VerticalAlignment="Center"
+                Source="{Binding ColorImageSource}" Stretch="Uniform" />
+            <Image Name="Template" Visibility="Hidden"
+                Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="4" Grid.RowSpan="3"
+                HorizontalAlignment="Center" VerticalAlignment="Center"
+                Source="{StaticResource Template}" Stretch="Uniform" />
+            <Path Name="BottomPanel" Height="180" Width="880" Fill="#FFFFFF"
+                  Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="4"
+                  Visibility="Hidden">
+                <Path.Data>
+                    <PathGeometry>
+                        <PathGeometry.Figures>
+                            <PathFigure StartPoint="80,10">
+                                <PathFigure.Segments>
+                                    <LineSegment Point="800,10" />
+                                    <ArcSegment Point="805,165" Size="1,1" IsLargeArc="True" SweepDirection="Clockwise" />
+                                    <LineSegment Point="80, 165" />
+                                    <ArcSegment Point="80,10" Size="1,1" IsLargeArc="True" SweepDirection="Clockwise" />
+                                </PathFigure.Segments>
+                            </PathFigure>
+                        </PathGeometry.Figures>
+                    </PathGeometry>
+                </Path.Data>
+            </Path>
+            <TextBlock Name="BottomPanelText" FontSize="32" FontWeight="Light" FontFamily="{StaticResource Monserrat}"
+                       Foreground="#000" Visibility="Hidden"
+                       Width="800" TextWrapping="Wrap" TextAlignment="Center"
+                       VerticalAlignment="Center" HorizontalAlignment="Center"
+                       Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="4">Ubícate para que tu cabeza se alinee con la imagen. Presiona continuar cuando hayas terminado.</TextBlock>
             <Button Name="StartButton" Click="OnStartButton"
                 Visibility="Hidden"
-                Grid.Column="2" Grid.Row="2"
+                Grid.Column="3" Grid.Row="3" Grid.ColumnSpan="2"
                 Height="150" Width="350"
                 Background="Transparent" BorderBrush="Transparent" Padding="0"
                 VerticalAlignment="Center" HorizontalAlignment="Center">
@@ -100,15 +133,11 @@
             <TextBlock Name="ButtonLabel" FontSize="52" FontWeight="Light" FontFamily="{StaticResource Monserrat}"
                        Foreground="#FFF" Visibility="Hidden"
                        VerticalAlignment="Center" HorizontalAlignment="Center"
-                       Grid.Column="2" Grid.Row="2"> Empezar</TextBlock>
-            <Image Name="VideoCapture" Visibility="Hidden"
-                Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2"
-                HorizontalAlignment="Center" VerticalAlignment="Bottom"
-                Source="{Binding ColorImageSource}" Stretch="Uniform" />
-            <Image Name="IndexCapture" Visibility="Visible"
-                Grid.Column="3" Grid.Row="3"
-                HorizontalAlignment="Center" VerticalAlignment="Bottom"
-                Source="{Binding IndexImageSource}" Stretch="Uniform" />
+                       Grid.Column="3" Grid.Row="3" Grid.ColumnSpan="2"> Empezar</TextBlock>
+            <Image Name="ImgReference" Visibility="Hidden"
+                Grid.Column="2" Grid.Row="3" Grid.ColumnSpan="2" Grid.RowSpan="1"
+                HorizontalAlignment="Center" VerticalAlignment="Center"
+                Source="{StaticResource Ref_1}" Stretch="Uniform" />
         </Grid>
     </k:KinectRegion>
 </Window>

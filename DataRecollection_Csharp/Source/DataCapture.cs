@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
+﻿using System.IO;
 using System.Windows.Media.Imaging;
-using Microsoft.Kinect;
-using Microsoft.Kinect.Face;
-using Newtonsoft.Json;
 using NAudio.Wave;
 
 namespace DataRecollection.Source
@@ -15,7 +8,7 @@ namespace DataRecollection.Source
     {
         WaveIn sourceStream;
         WaveFileWriter waveWriter;
-        private static string BASE_DIR = @"CollectedData\";
+        private static string BASE_DIR = @"CollectedData";
         private string subject;
         private int currentSubject;
 
@@ -23,7 +16,7 @@ namespace DataRecollection.Source
         {
             currentSubject = 0;
 
-            while (Directory.Exists(BASE_DIR + "sbj-" + currentSubject))
+            while (Directory.Exists(Path.Combine(BASE_DIR, "sbj-" + currentSubject)))
             {
                 currentSubject += 1;
             }
@@ -32,13 +25,13 @@ namespace DataRecollection.Source
         public void NewSubject()
         {
             subject = "sbj-" + currentSubject;
-            Directory.CreateDirectory(BASE_DIR + subject);
+            Directory.CreateDirectory(Path.Combine(BASE_DIR, subject));
             currentSubject += 1;
         }
 
         public void CaptureImage(WriteableBitmap image, string imageType, int capture)
         {
-            string filename = BASE_DIR + subject + "\\cpt_" + capture + "_" + imageType + ".png";
+            string filename = Path.Combine(BASE_DIR, subject, "cpt_" + capture + "_" + imageType + "_i.png");
             using (FileStream stream = new FileStream(filename, FileMode.Create))
             {
                 PngBitmapEncoder encoder = new PngBitmapEncoder();
@@ -47,39 +40,24 @@ namespace DataRecollection.Source
             }
         }
 
-        public void CaptureFaceMesh(IReadOnlyList<CameraSpacePoint> mesh, IReadOnlyList<uint> indices, int capture)
+        public void CaptureData(ushort[] data, string dataType, int capture, int width, int height)
         {
-            string filename = BASE_DIR + subject + "\\cpt_" + capture + "_FaceMesh.obj";
-            using (StreamWriter outputFile = new StreamWriter(filename))
+            string filename = Path.Combine(BASE_DIR, subject, "cpt_" + capture + "_" + dataType + "_d.dat");
+            using (FileStream fs = File.Create(filename))
             {
-                outputFile.WriteLine("# Vertices");
-                foreach (var ver in mesh)
+                using (StreamWriter bw = new StreamWriter(fs))
                 {
-                    String line = "v " + ver.X + " " + ver.Y + " " + ver.Z + " 1.0";
-                    outputFile.WriteLine(line);
+                    for (int i = 0; i < height; i++)
+                    {
+                        for (int j = 0; j < width; j++)
+                        {
+                            ushort value = data[(i*width) + j];
+                            bw.Write(value.ToString());
+                            bw.Write('\t');
+                        }
+                        bw.Write("\r\n");
+                    }
                 }
-
-                outputFile.WriteLine("# Indices");
-                for (int i = 0; i < indices.Count; i += 3)
-                {
-                    uint index01 = indices[i];
-                    uint index02 = indices[i + 1];
-                    uint index03 = indices[i + 2];
-
-                    String line = "f " + index01 + " " + index02 + " " + index03;
-                    outputFile.WriteLine(line);
-                }
-            }
-        }
-
-        public void WriteCaptureInfo(FaceFrameResult result, int capture)
-        {
-            var faceData = new FaceData(result);
-            string filename = BASE_DIR + subject + "\\cpt_" + capture + "_FaceData.json";
-            using (StreamWriter outputFile = new StreamWriter(filename))
-            {
-                JsonSerializer serializer = new JsonSerializer();
-                serializer.Serialize(outputFile, faceData);
             }
         }
 
@@ -94,7 +72,7 @@ namespace DataRecollection.Source
 
             sourceStream.DataAvailable += this.AudioStreamDataAvailable;
 
-            string filename = BASE_DIR + subject + "\\_" + audioType + ".wav";
+            string filename = Path.Combine(BASE_DIR, subject, "_" + audioType + ".wav");
 
             waveWriter = new WaveFileWriter(filename, sourceStream.WaveFormat);
             sourceStream.StartRecording();

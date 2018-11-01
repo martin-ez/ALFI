@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Microsoft.Kinect;
-using Microsoft.Kinect.Face;
 
 namespace DataRecollection.Source
 {
@@ -21,21 +19,19 @@ namespace DataRecollection.Source
         private MultiSourceFrameReader multiSourceReader = null;
 
         private readonly WriteableBitmap colorBitmap = null;
+        private readonly byte[] colorBuffer = null;
+
         private readonly WriteableBitmap depthBitmap = null;
+        private readonly byte[] depthBuffer = null;
+        private readonly ushort[] depthData = null;
+
         private readonly WriteableBitmap infraredBitmap = null;
+        private readonly byte[] infraredBuffer= null;
+        private readonly ushort[] infraredData = null;
+
         private readonly WriteableBitmap indexBitmap = null;
-
-        private FaceFrameSource faceFrameSource = null;
-        private FaceFrameReader faceFrameReader = null;
-        private FaceFrameResult faceTrackedData = null;
-
-        private HighDefinitionFaceFrameSource highDefinitionFaceFrameSource = null;
-        private HighDefinitionFaceFrameReader highDefinitionFaceFrameReader = null;
-        private FaceModelBuilder faceModelBuilder = null;
-        private FaceModel faceModel = null;
-        private readonly FaceAlignment faceAlignment = null;
-        private IReadOnlyList<CameraSpacePoint> mesh;
-        private IReadOnlyList<uint> meshIndices;
+        private readonly byte[] indexBuffer = null;
+        private readonly byte[] indexData = null;
 
         private Rect displayRectColor;
         private Rect displayRectInfrared;
@@ -62,36 +58,20 @@ namespace DataRecollection.Source
             multiSourceReader = kinectSensor.OpenMultiSourceFrameReader(FrameSourceTypes.Color | FrameSourceTypes.Depth | FrameSourceTypes.Infrared | FrameSourceTypes.Body | FrameSourceTypes.BodyIndex);
             multiSourceReader.MultiSourceFrameArrived += Reader_MultiSourceFrameArrived;
 
-            this.colorBitmap = new WriteableBitmap(colorFrameDescription.Width, colorFrameDescription.Height, 96.0, 96.0, PixelFormats.Bgr32, null);
-            this.depthBitmap = new WriteableBitmap(depthFrameDescription.Width, depthFrameDescription.Height, 96.0, 96.0, PixelFormats.Bgr32, null);
-            this.infraredBitmap = new WriteableBitmap(irFrameDescription.Width, irFrameDescription.Height, 96.0, 96.0, PixelFormats.Bgr32, null);
-            this.indexBitmap = new WriteableBitmap(indexFrameDescription.Width, indexFrameDescription.Height, 96.0, 96.0, PixelFormats.Bgr32, null);
+            colorBitmap = new WriteableBitmap(colorFrameDescription.Width, colorFrameDescription.Height, 96.0, 96.0, PixelFormats.Bgr32, null);
+            colorBuffer = new byte[colorFrameDescription.Width * colorFrameDescription.Height * ((PixelFormats.Bgr32.BitsPerPixel + 7) / 8)];
 
-            this.highDefinitionFaceFrameSource = new HighDefinitionFaceFrameSource(this.kinectSensor);
-            this.highDefinitionFaceFrameSource.TrackingIdLost += HDFaceFrameSource_TrackingIdLost;
-            this.highDefinitionFaceFrameReader = this.highDefinitionFaceFrameSource.OpenReader();
-            this.highDefinitionFaceFrameReader.FrameArrived += Reader_HDFaceFrameArrived;
-            this.faceModel = new FaceModel();
-            this.faceAlignment = new FaceAlignment();
+            depthBitmap = new WriteableBitmap(depthFrameDescription.Width, depthFrameDescription.Height, 96.0, 96.0, PixelFormats.Bgr32, null);
+            depthBuffer = new byte[depthFrameDescription.Width * depthFrameDescription.Height * (PixelFormats.Bgr32.BitsPerPixel + 7) / 8];
+            depthData = new ushort[depthFrameDescription.Width * depthFrameDescription.Height];
 
-            FaceFrameFeatures faceFrameFeatures =
-                FaceFrameFeatures.BoundingBoxInColorSpace
-                | FaceFrameFeatures.PointsInColorSpace
-                | FaceFrameFeatures.BoundingBoxInInfraredSpace
-                | FaceFrameFeatures.PointsInInfraredSpace
-                | FaceFrameFeatures.RotationOrientation
-                | FaceFrameFeatures.FaceEngagement
-                | FaceFrameFeatures.Glasses
-                | FaceFrameFeatures.Happy
-                | FaceFrameFeatures.LeftEyeClosed
-                | FaceFrameFeatures.RightEyeClosed
-                | FaceFrameFeatures.LookingAway
-                | FaceFrameFeatures.MouthMoved
-                | FaceFrameFeatures.MouthOpen;
+            infraredBitmap = new WriteableBitmap(irFrameDescription.Width, irFrameDescription.Height, 96.0, 96.0, PixelFormats.Bgr32, null);
+            infraredBuffer = new byte[irFrameDescription.Width * irFrameDescription.Height * (PixelFormats.Bgr32.BitsPerPixel + 7) / 8];
+            infraredData = new ushort[irFrameDescription.Width * irFrameDescription.Height];
 
-            this.faceFrameSource = new FaceFrameSource(this.kinectSensor, 0, faceFrameFeatures);
-            this.faceFrameReader = this.faceFrameSource.OpenReader();
-            this.faceFrameReader.FrameArrived += Reader_FaceFrameArrived;
+            indexBitmap = new WriteableBitmap(indexFrameDescription.Width, indexFrameDescription.Height, 96.0, 96.0, PixelFormats.Bgr32, null);
+            indexBuffer = new byte[indexFrameDescription.Width * indexFrameDescription.Height * (PixelFormats.Bgr32.BitsPerPixel + 7) / 8];
+            indexData = new byte[indexFrameDescription.Width * indexFrameDescription.Height];
 
             // open the sensor
             this.kinectSensor.Open();
@@ -124,19 +104,22 @@ namespace DataRecollection.Source
             return null;
         }
 
-        public FaceFrameResult GetTrackedFaceData()
+        public ushort[] GetData(BitmapType type)
         {
-            return this.faceTrackedData;
+            switch (type)
+            {
+                case BitmapType.Depth:
+                    return this.depthData;
+                case BitmapType.Infrared:
+                    return this.infraredData;
+            }
+
+            return null;
         }
 
-        public IReadOnlyList<CameraSpacePoint> GetMesh()
+        public Rect GetInfraredRect()
         {
-            return this.mesh;
-        }
-
-        public IReadOnlyList<uint> GetMeshIndices()
-        {
-            return this.meshIndices;
+            return this.displayRectInfrared;
         }
 
         private void Reader_MultiSourceFrameArrived(object sender, MultiSourceFrameArrivedEventArgs e)
@@ -206,9 +189,6 @@ namespace DataRecollection.Source
                 OnStartTracking?.Invoke();
                 this.currentTrackedBody = selectedBody;
                 this.currentTrackingId = selectedBody.TrackingId;
-                this.faceFrameSource.TrackingId = selectedBody.TrackingId;
-
-                this.highDefinitionFaceFrameSource.TrackingId = this.currentTrackingId;
             }
         }
 
@@ -217,20 +197,18 @@ namespace DataRecollection.Source
             int width = frame.FrameDescription.Width;
             int height = frame.FrameDescription.Height;
 
-            byte[] pixels = new byte[width * height * ((PixelFormats.Bgr32.BitsPerPixel + 7) / 8)];
-
             if (frame.RawColorImageFormat == ColorImageFormat.Bgra)
             {
-                frame.CopyRawFrameDataToArray(pixels);
+                frame.CopyRawFrameDataToArray(colorBuffer);
             }
             else
             {
-                frame.CopyConvertedFrameDataToArray(pixels, ColorImageFormat.Bgra);
+                frame.CopyConvertedFrameDataToArray(colorBuffer, ColorImageFormat.Bgra);
             }
 
             int stride = width * PixelFormats.Bgr32.BitsPerPixel / 8;
 
-            this.colorBitmap.WritePixels(new Int32Rect(0, 0, width, height), pixels, stride, 0);
+            this.colorBitmap.WritePixels(new Int32Rect(0, 0, width, height), colorBuffer, stride, 0);
         }
 
         private void DepthToBitmap(DepthFrame frame)
@@ -241,9 +219,6 @@ namespace DataRecollection.Source
             ushort minDepth = frame.DepthMinReliableDistance;
             ushort maxDepth = frame.DepthMaxReliableDistance;
 
-            ushort[] depthData = new ushort[width * height];
-            byte[] pixelData = new byte[width * height * (PixelFormats.Bgr32.BitsPerPixel + 7) / 8];
-
             frame.CopyFrameDataToArray(depthData);
 
             int colorIndex = 0;
@@ -252,25 +227,22 @@ namespace DataRecollection.Source
                 ushort depth = depthData[depthIndex];
                 double interpolation = (double)(depth - minDepth) / (double)(maxDepth - minDepth);
                 byte intensity = (byte)(depth >= minDepth && depth <= maxDepth ? interpolation * 255 : 0);
-                pixelData[colorIndex++] = intensity; // Blue
-                pixelData[colorIndex++] = intensity; // Green
-                pixelData[colorIndex++] = intensity; // Red
+                depthBuffer[colorIndex++] = intensity; // Blue
+                depthBuffer[colorIndex++] = intensity; // Green
+                depthBuffer[colorIndex++] = intensity; // Red
 
                 ++colorIndex;
             }
 
             int stride = width * PixelFormats.Bgr32.BitsPerPixel / 8;
 
-            this.depthBitmap.WritePixels(new Int32Rect(0, 0, width, height), pixelData, stride, 0);
+            this.depthBitmap.WritePixels(new Int32Rect(0, 0, width, height), depthBuffer, stride, 0);
         }
 
         private void InfraredToBitmap(InfraredFrame frame)
         {
             int width = frame.FrameDescription.Width;
             int height = frame.FrameDescription.Height;
-
-            ushort[] infraredData = new ushort[width * height];
-            byte[] pixelData = new byte[width * height * (PixelFormats.Bgr32.BitsPerPixel + 7) / 8];
 
             frame.CopyFrameDataToArray(infraredData);
 
@@ -280,25 +252,22 @@ namespace DataRecollection.Source
                 ushort ir = infraredData[infraredIndex];
                 byte intensity = (byte)(ir >> 8);
 
-                pixelData[colorIndex++] = intensity; // Blue
-                pixelData[colorIndex++] = intensity; // Green   
-                pixelData[colorIndex++] = intensity; // Red
+                infraredBuffer[colorIndex++] = intensity; // Blue
+                infraredBuffer[colorIndex++] = intensity; // Green   
+                infraredBuffer[colorIndex++] = intensity; // Red
 
                 ++colorIndex;
             }
 
             int stride = width * PixelFormats.Bgr32.BitsPerPixel / 8;
 
-            this.infraredBitmap.WritePixels(new Int32Rect(0, 0, width, height), pixelData, stride, 0);
+            this.infraredBitmap.WritePixels(new Int32Rect(0, 0, width, height), infraredBuffer, stride, 0);
         }
 
         private void IndexToBitmap(BodyIndexFrame frame)
         {
             int width = frame.FrameDescription.Width;
             int height = frame.FrameDescription.Height;
-
-            byte[] indexData = new byte[width * height];
-            byte[] pixelData = new byte[width * height * (PixelFormats.Bgr32.BitsPerPixel + 7) / 8];
 
             frame.CopyFrameDataToArray(indexData);
 
@@ -311,145 +280,18 @@ namespace DataRecollection.Source
                     intensity = 255;
                 }
 
-                pixelData[colorIndex++] = intensity; // Blue
-                pixelData[colorIndex++] = intensity; // Green   
-                pixelData[colorIndex++] = intensity; // Red
+                indexBuffer[colorIndex++] = intensity; // Blue
+                indexBuffer[colorIndex++] = intensity; // Green   
+                indexBuffer[colorIndex++] = intensity; // Red
 
                 ++colorIndex;
             }
 
             int stride = width * PixelFormats.Bgr32.BitsPerPixel / 8;
 
-            this.indexBitmap.WritePixels(new Int32Rect(0, 0, width, height), pixelData, stride, 0);
+            this.indexBitmap.WritePixels(new Int32Rect(0, 0, width, height), indexBuffer, stride, 0);
         }
-
-        private void Reader_FaceFrameArrived(object sender, FaceFrameArrivedEventArgs e)
-        {
-            using (FaceFrame faceFrame = e.FrameReference.AcquireFrame())
-            {
-                if (faceFrame != null)
-                {
-                    // check if this face frame has valid face frame results
-                    var tracking = ValidateFaceBoxAndPoints(faceFrame.FaceFrameResult);
-                    if (tracking)
-                    {
-                        this.faceTrackedData = faceFrame.FaceFrameResult;
-                    }
-                    else
-                    {
-                        this.faceTrackedData = null;
-                    }
-                }
-            }
-        }
-
-        private void Reader_HDFaceFrameArrived(object sender, HighDefinitionFaceFrameArrivedEventArgs e)
-        {
-            using (var frame = e.FrameReference.AcquireFrame())
-            {
-                if (frame == null || !frame.IsFaceTracked)
-                {
-                    return;
-                }
-
-                frame.GetAndRefreshFaceAlignmentResult(this.faceAlignment);
-                this.mesh = this.faceModel.CalculateVerticesForAlignment(this.faceAlignment);
-                this.meshIndices = this.faceModel.TriangleIndices;
-            }
-        }
-
-        private void HDFaceFrameSource_TrackingIdLost(object sender, TrackingIdLostEventArgs e)
-        {
-            var lostTrackingID = e.TrackingId;
-
-            if (this.currentTrackingId == lostTrackingID)
-            {
-                this.currentTrackingId = 0;
-                this.currentTrackedBody = null;
-                if (this.faceModelBuilder != null)
-                {
-                    this.faceModelBuilder.Dispose();
-                    this.faceModelBuilder = null;
-                }
-
-                this.highDefinitionFaceFrameSource.TrackingId = 0;
-            }
-        }
-
-        private void StartCapture()
-        {
-            this.StopFaceCapture();
-
-            this.faceModelBuilder = null;
-
-            this.faceModelBuilder = this.highDefinitionFaceFrameSource.OpenModelBuilder(FaceModelBuilderAttributes.None);
-
-            this.faceModelBuilder.BeginFaceDataCollection();
-
-            this.faceModelBuilder.CollectionCompleted += this.HdFaceBuilder_CollectionCompleted;
-        }
-
-        private void StopFaceCapture()
-        {
-            if (this.faceModelBuilder != null)
-            {
-                this.faceModelBuilder.Dispose();
-                this.faceModelBuilder = null;
-            }
-        }
-
-        private void HdFaceBuilder_CollectionCompleted(object sender, FaceModelBuilderCollectionCompletedEventArgs e)
-        {
-            var modelData = e.ModelData;
-
-            this.faceModel = modelData.ProduceFaceModel();
-
-            this.faceModelBuilder.Dispose();
-            this.faceModelBuilder = null;
-        }
-
-        private bool ValidateFaceBoxAndPoints(FaceFrameResult faceResult)
-        {
-            bool isFaceValid = faceResult != null;
-
-            if (isFaceValid)
-            {
-                var faceBox = faceResult.FaceBoundingBoxInColorSpace;
-                if (faceBox != null)
-                {
-                    // check if we have a valid rectangle within the bounds of the screen space
-                    isFaceValid = (faceBox.Right - faceBox.Left) > 0 &&
-                                  (faceBox.Bottom - faceBox.Top) > 0 &&
-                                  faceBox.Right <= this.displayRectColor.Width &&
-                                  faceBox.Bottom <= this.displayRectColor.Height;
-
-                    if (isFaceValid)
-                    {
-                        var facePoints = faceResult.FacePointsInColorSpace;
-                        if (facePoints != null)
-                        {
-                            foreach (PointF pointF in facePoints.Values)
-                            {
-                                // check if we have a valid face point within the bounds of the screen space
-                                bool isFacePointValid = pointF.X > 0.0f &&
-                                                        pointF.Y > 0.0f &&
-                                                        pointF.X < this.displayRectColor.Width &&
-                                                        pointF.Y < this.displayRectColor.Height;
-
-                                if (!isFacePointValid)
-                                {
-                                    isFaceValid = false;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            return isFaceValid;
-        }
-
+      
         private static Body FindBodyWithTrackingId(BodyFrame bodyFrame, ulong trackingId)
         {
             Body result = null;
@@ -510,18 +352,6 @@ namespace DataRecollection.Source
 
         public void CloseReaders()
         {
-            if (this.faceFrameReader != null)
-            {
-                this.faceFrameReader.Dispose();
-                this.faceFrameReader = null;
-            }
-
-            if (this.faceFrameSource != null)
-            {
-                this.faceFrameSource.Dispose();
-                this.faceFrameSource = null;
-            }
-
             if (this.multiSourceReader != null)
             {
                 this.multiSourceReader.Dispose();

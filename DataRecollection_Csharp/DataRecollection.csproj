@@ -347,5 +347,18 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\Img\template.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\Img\1.png" />
+    <Resource Include="Assets\Img\2.png" />
+    <Resource Include="Assets\Img\3.png" />
+    <Resource Include="Assets\Img\4.png" />
+    <Resource Include="Assets\Img\5.png" />
+    <Resource Include="Assets\Img\6.png" />
+    <Resource Include="Assets\Img\7.png" />
+    <Resource Include="Assets\Img\8.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
