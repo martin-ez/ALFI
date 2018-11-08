@@ -92,7 +92,6 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Animations\UIAnimations.cs" />
-    <Compile Include="Source\FaceData.cs" />
     <Compile Include="Source\KinectManager.cs" />
     <Page Include="HandPointers\HandPointerStyles.xaml">
       <Generator>MSBuild:Compile</Generator>

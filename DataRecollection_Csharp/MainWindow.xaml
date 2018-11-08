@@ -4,6 +4,7 @@
         xmlns:k="http://schemas.microsoft.com/kinect/2014"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DataRecollection.Source"
         Title="Data Recollection" 
         mc:Ignorable="d"
         d:DesignWidth="1280"
@@ -35,6 +36,16 @@
             <GradientStop Color="#4cbcc9" Offset="0.75"/>
             <GradientStop Color="#6bd5d3" Offset="1.0"/>
         </LinearGradientBrush>
+        <Storyboard x:Key="FlashAnimation"
+                    Storyboard.TargetName="FlashRect"
+                    Storyboard.TargetProperty="(Rectangle.Opacity)">
+            <DoubleAnimation From="1" To="0" Duration="0:0:1" />
+        </Storyboard>
+        <Storyboard x:Key="TimerAnimation"
+                    Storyboard.TargetName="Timer"
+                    Storyboard.TargetProperty="(Rectangle.Width)">
+            <DoubleAnimation From="450" To="0" Duration="0:0:8" />
+        </Storyboard>
     </Window.Resources>
     <k:KinectRegion x:Name="kinectRegion">
         <Grid>
@@ -53,10 +64,10 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="30"/>
             </Grid.ColumnDefinitions>
-            <Canvas Name="BGCanvas"
+            <Canvas Name="BGCanvas" Visibility="Visible"
                 Grid.Column="0" Grid.ColumnSpan="6" Grid.Row="0" Grid.RowSpan="6"
                 Background="{StaticResource BGGradientBrush}"/>
-            <TextBlock Name="MainLabel"
+            <TextBlock Name="MainLabel" Visibility="Visible"
                    Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="4" Grid.RowSpan="2"
                    FontSize="92" FontWeight="Regular" Foreground="#FFF"
                    TextAlignment="Center"
@@ -84,9 +95,9 @@
                 Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="4" Grid.RowSpan="3"
                 HorizontalAlignment="Center" VerticalAlignment="Center"
                 Source="{StaticResource Template}" Stretch="Uniform" />
-            <Path Name="BottomPanel" Height="180" Width="880" Fill="#FFFFFF"
-                  Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="4"
-                  Visibility="Hidden">
+            <Path Name="BottomPanel" Visibility="Hidden"
+                  Height="180" Width="880" Fill="#FFFFFF"
+                  Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="4">
                 <Path.Data>
                     <PathGeometry>
                         <PathGeometry.Figures>
@@ -102,17 +113,15 @@
                     </PathGeometry>
                 </Path.Data>
             </Path>
-            <TextBlock Name="BottomPanelText" FontSize="32" FontWeight="Light" FontFamily="{StaticResource Monserrat}"
-                       Foreground="#000" Visibility="Hidden"
+            <TextBlock Name="BottomPanelText" Visibility="Hidden"
+                       FontSize="32" FontWeight="Light" FontFamily="{StaticResource Monserrat}" Foreground="#000"
                        Width="800" TextWrapping="Wrap" TextAlignment="Center"
                        VerticalAlignment="Center" HorizontalAlignment="Center"
                        Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="4">Ubícate para que tu cabeza se alinee con la imagen. Presiona continuar cuando hayas terminado.</TextBlock>
-            <Button Name="StartButton" Click="OnStartButton"
-                Visibility="Hidden"
-                Grid.Column="3" Grid.Row="3" Grid.ColumnSpan="2"
-                Height="150" Width="350"
-                Background="Transparent" BorderBrush="Transparent" Padding="0"
-                VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Button Name="StartButton" Visibility="Hidden"
+                    Click="OnStartButton" Grid.Column="3" Grid.Row="3" Grid.ColumnSpan="2"
+                    Height="150" Width="350" Background="Transparent" BorderBrush="Transparent" Padding="0"
+                    VerticalAlignment="Center" HorizontalAlignment="Center">
                 <Path Name="ButtonPath" Height="150" Width="350" Fill="{StaticResource BlueGradientBrush}">
                     <Path.Data>
                         <PathGeometry>
@@ -130,14 +139,32 @@
                     </Path.Data>
                 </Path>
             </Button>
-            <TextBlock Name="ButtonLabel" FontSize="52" FontWeight="Light" FontFamily="{StaticResource Monserrat}"
-                       Foreground="#FFF" Visibility="Hidden"
+            <TextBlock Name="ButtonLabel" Visibility="Hidden"
+                       FontSize="52" FontWeight="Light" FontFamily="{StaticResource Monserrat}" Foreground="#FFF" 
                        VerticalAlignment="Center" HorizontalAlignment="Center"
                        Grid.Column="3" Grid.Row="3" Grid.ColumnSpan="2"> Empezar</TextBlock>
+            <Rectangle Name="ImgReferenceBG" Visibility="Hidden"
+                       Fill="#FFF" Width="200" Height="200"
+                       Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2" Grid.RowSpan="1"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
             <Image Name="ImgReference" Visibility="Hidden"
-                Grid.Column="2" Grid.Row="3" Grid.ColumnSpan="2" Grid.RowSpan="1"
-                HorizontalAlignment="Center" VerticalAlignment="Center"
-                Source="{StaticResource Ref_1}" Stretch="Uniform" />
+                   Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2" Grid.RowSpan="1"
+                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                   Source="{StaticResource Ref_1}" Stretch="Uniform" Margin="15"/>
+            <Rectangle Name="TimerBG" Visibility="Hidden"
+                Width="450" Height="60" Fill="#6bd5d3" Opacity="0.5"
+                Grid.Column="2" Grid.ColumnSpan="2"
+                Grid.Row="2" Grid.RowSpan="2"
+                HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="78"/>
+            <Rectangle Name="Timer" Visibility="Hidden"
+                Width="450" Height="60" Fill="#33a3bc"
+                Grid.Column="2" Grid.ColumnSpan="2"
+                Grid.Row="2" Grid.RowSpan="2"
+                HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="78"/>
+            <Rectangle Name="FlashRect" Visibility="Visible"
+                       Opacity="0" Fill="#FFF"
+                       Grid.Column="0" Grid.ColumnSpan="6"
+                       Grid.Row="0" Grid.RowSpan="6" />
         </Grid>
     </k:KinectRegion>
 </Window>

@@ -16,11 +16,17 @@ namespace DataRecollection
     using Microsoft.Kinect.Wpf.Controls;
     using DataRecollection.Animations;
     using System.Windows.Controls;
+    using System.Windows.Media.Animation;
 
     public partial class MainWindow : Window
     {
         private KinectManager kinect = null;
         private DataCapture capture = null;
+
+        private Storyboard flashAnimation;
+        private Storyboard timerAnimation;
+
+        private Random rnd;
 
         private long nextCapture = 0;
         private int captureCooldown = 3000;
@@ -47,6 +53,8 @@ namespace DataRecollection
         {
             kinect = new KinectManager();
             capture = new DataCapture();
+
+            rnd = new Random();
 
             kinect.OnStartTracking += PersonEnter;
             kinect.OnStopTracking += PersonLeave;
@@ -86,6 +94,11 @@ namespace DataRecollection
                     ResizeMode = ResizeMode.NoResize;
                     fullScreen = true;
                 }
+            }
+            if (e.Key == Key.F)
+            {
+                FlashAnimation();
+                TimerAnimation();
             }
         }
 
@@ -135,6 +148,9 @@ namespace DataRecollection
                 currentCapture = 1;
                 Template.Visibility = Visibility.Collapsed;
                 BottomPanelText.Text = "Imagenes de guia apareceran en la pantalla, por cada una intenta imitar la orientación de la cabeza mostrada en la imagen. Presiona continuar para empezar las capturas.";
+                ImgReference.Visibility = Visibility.Visible;
+                ImgReferenceBG.Visibility = Visibility.Visible;
+                DemoReel();
             }
             else if (stage == CaptureStage.Demo)
             {
@@ -143,8 +159,8 @@ namespace DataRecollection
                 ButtonLabel.Visibility = Visibility.Collapsed;
                 BottomPanel.Visibility = Visibility.Collapsed;
                 BottomPanelText.Visibility = Visibility.Collapsed;
-                ImgReference.Source = (ImageSource) FindResource("Ref_1");
-                ImgReference.Visibility = Visibility.Visible;
+                ImgReference.Source = (ImageSource)FindResource("Ref_1");
+
                 Task.Delay(3000).ContinueWith(t => NextCapture());
             }
         }
@@ -158,7 +174,7 @@ namespace DataRecollection
                 currentCapture += 1;
                 if (currentCapture < 9 && stage == CaptureStage.ImageCaptures)
                 {
-                    ImgReference.Source = (ImageSource)FindResource("Ref_"+currentCapture);
+                    ImgReference.Source = (ImageSource)FindResource("Ref_" + currentCapture);
                     Task.Delay(3000).ContinueWith(t => NextCapture());
                 }
                 else if (currentCapture == 9 && stage == CaptureStage.ImageCaptures)
@@ -167,17 +183,20 @@ namespace DataRecollection
                     capture.StartAudioRecording("Name");
                     VideoCapture.Visibility = Visibility.Collapsed;
                     ImgReference.Visibility = Visibility.Collapsed;
+                    ImgReferenceBG.Visibility = Visibility.Collapsed;
                     MainLabel.Visibility = Visibility.Visible;
                     MainLabel.Text = "Por favor di tu nombre.";
                     MainLabel.VerticalAlignment = VerticalAlignment.Center;
-                    Task.Delay(7000).ContinueWith(t => NextCapture());
+                    TimerAnimation();
+                    Task.Delay(8000).ContinueWith(t => NextCapture());
                 }
                 else if (currentCapture == 10 && stage == CaptureStage.AudioCapture)
                 {
                     capture.EndAudioRecording();
                     capture.StartAudioRecording("Email");
                     MainLabel.Text = "Di tu correo electrónico si deseas ser contactado con información y avances del proyecto.";
-                    Task.Delay(7000).ContinueWith(t => NextCapture());
+                    TimerAnimation();
+                    Task.Delay(8000).ContinueWith(t => NextCapture());
                 }
                 else if (currentCapture == 11 && stage == CaptureStage.AudioCapture)
                 {
@@ -186,6 +205,8 @@ namespace DataRecollection
                     ButtonLabel.Text = "Empezar";
                     SmallLabel.Text = "Levanta tu mano y presiona el boton para empezar.";
                     MainLabel.Text = "Muchas gracias por tu participación!";
+                    Timer.Visibility = Visibility.Collapsed;
+                    TimerBG.Visibility = Visibility.Collapsed;
                 }
             });
         }
@@ -241,10 +262,47 @@ namespace DataRecollection
             MainLabel.Visibility = Visibility.Visible;
             VideoCapture.Visibility = Visibility.Collapsed;
             ImgReference.Visibility = Visibility.Collapsed;
+            ImgReferenceBG.Visibility = Visibility.Collapsed;
+            Timer.Visibility = Visibility.Collapsed;
+            TimerBG.Visibility = Visibility.Collapsed;
 
             string[] fromGradient = { "#ffd52941", "#ffe45f42", "#ffee894c", "#fff6b061", "#fffcd581" };
             string[] toGradient = { "#ff1f719b", "#ff238aad", "#ff33a3bc", "#ff4cbcc9", "#ff6bd5d3" };
             UIAnimations.GradientAnimation(1.0, fromGradient, toGradient, BGCanvas);
+        }
+
+        void FlashAnimation()
+        {
+            if (flashAnimation == null)
+            {
+                flashAnimation = FindResource("FlashAnimation") as Storyboard;
+            }
+
+            flashAnimation.Begin();
+        }
+
+        void TimerAnimation()
+        {
+            if (timerAnimation == null)
+            {
+                timerAnimation = FindResource("TimerAnimation") as Storyboard;
+            }
+
+            Timer.Visibility = Visibility.Visible;
+            TimerBG.Visibility = Visibility.Visible;
+            timerAnimation.Begin();
+        }
+
+        void DemoReel()
+        {
+            if (stage == CaptureStage.Demo)
+            {
+                this.Dispatcher.Invoke(() =>
+                {
+                    ImgReference.Source = (ImageSource)FindResource("Ref_" + rnd.Next(1, 9));
+                    Task.Delay(1000).ContinueWith(t => DemoReel());
+                });
+            }
         }
 
         void WaitToReturn()
@@ -273,6 +331,7 @@ namespace DataRecollection
             capture.CaptureData(kinect.GetData(KinectManager.BitmapType.Depth), "depth", captureNumber, (int)irRect.Width, (int)irRect.Height);
             capture.CaptureImage(kinect.GetBitmap(KinectManager.BitmapType.Infrared), "infrared", captureNumber);
             capture.CaptureImage(kinect.GetBitmap(KinectManager.BitmapType.BodyIndex), "index", captureNumber);
+            FlashAnimation();
         }
     }
 }
