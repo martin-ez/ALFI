@@ -96,7 +96,7 @@ namespace DataRecollection.Source
 
         public void Incomplete(string stage)
         {
-            using (StreamWriter outputFile = new StreamWriter(Path.Combine(BASE_DIR, "sbj-" + currentSubject, "INCOMPLETE.txt")))
+            using (StreamWriter outputFile = new StreamWriter(Path.Combine(BASE_DIR, subject, "INCOMPLETE.txt")))
             {
                 outputFile.WriteLine("This capture was stopped at " + stage);
             }

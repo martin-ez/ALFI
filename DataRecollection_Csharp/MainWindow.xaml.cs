@@ -239,10 +239,16 @@ namespace DataRecollection
 
         private void PersonLeave()
         {
-            if (stage != CaptureStage.Idle)
+            if (stage == CaptureStage.End)
+            {
+                stage = CaptureStage.Idle;
+                waitingToReturn = false;
+                PersonLeaveAnimation();
+            }
+            else if (stage != CaptureStage.Idle)
             {
                 waitingToReturn = true;
-                Task.Delay(1000).ContinueWith(t => WaitToReturn());
+                Task.Delay(3000).ContinueWith(t => WaitToReturn());
             }
         }
 
