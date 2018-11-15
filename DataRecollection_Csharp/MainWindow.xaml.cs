@@ -239,7 +239,7 @@ namespace DataRecollection
 
         private void PersonLeave()
         {
-            if (stage == CaptureStage.End)
+            if (stage == CaptureStage.End || stage == CaptureStage.Tracking)
             {
                 stage = CaptureStage.Idle;
                 waitingToReturn = false;
@@ -248,7 +248,7 @@ namespace DataRecollection
             else if (stage != CaptureStage.Idle)
             {
                 waitingToReturn = true;
-                Task.Delay(3000).ContinueWith(t => WaitToReturn());
+                Task.Delay(3500).ContinueWith(t => WaitToReturn());
             }
         }
 
@@ -317,7 +317,7 @@ namespace DataRecollection
             {
                 this.Dispatcher.Invoke(() =>
                 {
-                    if (stage == CaptureStage.ImageCaptures || stage == CaptureStage.AudioCapture)
+                    if (stage == CaptureStage.ImageCaptures || stage == CaptureStage.AudioCapture || stage == CaptureStage.Demo)
                     {
                         capture.Incomplete(stage.ToString());
                     }
