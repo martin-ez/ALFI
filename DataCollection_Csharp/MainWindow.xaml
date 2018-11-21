@@ -1,0 +1,170 @@
+﻿<Window x:Class="DataColletion.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:k="http://schemas.microsoft.com/kinect/2014"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DataColletion.Source"
+        Title="Data Recollection" 
+        mc:Ignorable="d"
+        d:DesignWidth="1280"
+        d:DesignHeight="720"
+        MinWidth="500"
+        MinHeight="700"
+        Closing="MainWindow_Closing"
+        WindowState="Normal"
+        WindowStyle="ToolWindow">
+    <Window.Resources>
+        <LinearGradientBrush x:Key="OrangeGradientBrush" StartPoint="0,1" EndPoint="1.0,0">
+            <GradientStop Color="#d52941" Offset="0.0"/>
+            <GradientStop Color="#e45f42" Offset="0.25"/>
+            <GradientStop Color="#ee894c" Offset="0.5"/>
+            <GradientStop Color="#f6b061" Offset="0.75"/>
+            <GradientStop Color="#fcd581" Offset="1.0"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="BlueGradientBrush" StartPoint="0,1" EndPoint="1,0">
+            <GradientStop Color="#1f719b" Offset="0.0"/>
+            <GradientStop Color="#238aad" Offset="0.25"/>
+            <GradientStop Color="#33a3bc" Offset="0.5"/>
+            <GradientStop Color="#4cbcc9" Offset="0.75"/>
+            <GradientStop Color="#6bd5d3" Offset="1.0"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="BGGradientBrush" StartPoint="0,1" EndPoint="1,0">
+            <GradientStop Color="#1f719b" Offset="0.0"/>
+            <GradientStop Color="#238aad" Offset="0.25"/>
+            <GradientStop Color="#33a3bc" Offset="0.5"/>
+            <GradientStop Color="#4cbcc9" Offset="0.75"/>
+            <GradientStop Color="#6bd5d3" Offset="1.0"/>
+        </LinearGradientBrush>
+        <Storyboard x:Key="FlashAnimation"
+                    Storyboard.TargetName="FlashRect"
+                    Storyboard.TargetProperty="(Rectangle.Opacity)">
+            <DoubleAnimation From="1" To="0" Duration="0:0:1" />
+        </Storyboard>
+        <Storyboard x:Key="TimerAnimation"
+                    Storyboard.TargetName="Timer"
+                    Storyboard.TargetProperty="(Rectangle.Width)">
+            <DoubleAnimation From="450" To="0" Duration="0:0:8" />
+        </Storyboard>
+    </Window.Resources>
+    <k:KinectRegion x:Name="kinectRegion">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="30" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="30"/>
+            </Grid.ColumnDefinitions>
+            <Canvas Name="BGCanvas" Visibility="Visible"
+                Grid.Column="0" Grid.ColumnSpan="6" Grid.Row="0" Grid.RowSpan="6"
+                Background="{StaticResource BGGradientBrush}"/>
+            <TextBlock Name="MainLabel" Visibility="Visible"
+                   Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="4" Grid.RowSpan="2"
+                   FontSize="92" FontWeight="Regular" Foreground="#FFF"
+                   TextAlignment="Center"
+                   VerticalAlignment="Center" HorizontalAlignment="Center"
+                   TextWrapping="Wrap" FontFamily="{StaticResource Monserrat}">
+                ¿Quieres ayudar a crear un algoritmo de identificación facial?
+            </TextBlock>
+            <TextBlock Name="SmallLabel" Visibility="Hidden"
+                   Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="2"
+                   FontSize="32" FontWeight="Regular" Foreground="#FFF"
+                   TextAlignment="Justify"
+                   VerticalAlignment="Center" HorizontalAlignment="Center"
+                   TextWrapping="Wrap" FontFamily="{StaticResource Monserrat}">
+                Levanta tu mano y presiona el boton para empezar.
+            </TextBlock>
+            <Image Name="IndexCapture" Visibility="Visible"
+                Grid.Column="6" Grid.Row="6"
+                HorizontalAlignment="Center" VerticalAlignment="Top"
+                Source="{Binding IndexImageSource}" Stretch="Uniform" />
+            <Image Name="VideoCapture" Visibility="Hidden"
+                Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="4" Grid.RowSpan="3"
+                HorizontalAlignment="Center" VerticalAlignment="Center"
+                Source="{Binding ColorImageSource}" Stretch="Uniform" />
+            <Image Name="Template" Visibility="Hidden"
+                Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="4" Grid.RowSpan="3"
+                HorizontalAlignment="Center" VerticalAlignment="Center"
+                Source="{StaticResource Template}" Stretch="Uniform" />
+            <Path Name="BottomPanel" Visibility="Hidden"
+                  Height="180" Width="880" Fill="#FFFFFF"
+                  Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="4">
+                <Path.Data>
+                    <PathGeometry>
+                        <PathGeometry.Figures>
+                            <PathFigure StartPoint="80,10">
+                                <PathFigure.Segments>
+                                    <LineSegment Point="800,10" />
+                                    <ArcSegment Point="805,165" Size="1,1" IsLargeArc="True" SweepDirection="Clockwise" />
+                                    <LineSegment Point="80, 165" />
+                                    <ArcSegment Point="80,10" Size="1,1" IsLargeArc="True" SweepDirection="Clockwise" />
+                                </PathFigure.Segments>
+                            </PathFigure>
+                        </PathGeometry.Figures>
+                    </PathGeometry>
+                </Path.Data>
+            </Path>
+            <TextBlock Name="BottomPanelText" Visibility="Hidden"
+                       FontSize="32" FontWeight="Light" FontFamily="{StaticResource Monserrat}" Foreground="#000"
+                       Width="800" TextWrapping="Wrap" TextAlignment="Center"
+                       VerticalAlignment="Center" HorizontalAlignment="Center"
+                       Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="4">Ubícate para que tu cabeza se alinee con la imagen. Presiona continuar cuando hayas terminado.</TextBlock>
+            <Button Name="StartButton" Visibility="Hidden"
+                    Click="OnStartButton" Grid.Column="3" Grid.Row="3" Grid.ColumnSpan="2"
+                    Height="150" Width="350" Background="Transparent" BorderBrush="Transparent" Padding="0"
+                    VerticalAlignment="Center" HorizontalAlignment="Center">
+                <Path Name="ButtonPath" Height="150" Width="350" Fill="{StaticResource BlueGradientBrush}">
+                    <Path.Data>
+                        <PathGeometry>
+                            <PathGeometry.Figures>
+                                <PathFigure StartPoint="80,10">
+                                    <PathFigure.Segments>
+                                        <LineSegment Point="270,10" />
+                                        <ArcSegment Point="275,145" Size="1,1" IsLargeArc="True" SweepDirection="Clockwise" />
+                                        <LineSegment Point="80, 145" />
+                                        <ArcSegment Point="80,10" Size="1,1" IsLargeArc="True" SweepDirection="Clockwise" />
+                                    </PathFigure.Segments>
+                                </PathFigure>
+                            </PathGeometry.Figures>
+                        </PathGeometry>
+                    </Path.Data>
+                </Path>
+            </Button>
+            <TextBlock Name="ButtonLabel" Visibility="Hidden"
+                       FontSize="52" FontWeight="Light" FontFamily="{StaticResource Monserrat}" Foreground="#FFF" 
+                       VerticalAlignment="Center" HorizontalAlignment="Center"
+                       Grid.Column="3" Grid.Row="3" Grid.ColumnSpan="2"> Empezar</TextBlock>
+            <Rectangle Name="ImgReferenceBG" Visibility="Hidden"
+                       Fill="#FFF" Width="200" Height="200"
+                       Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2" Grid.RowSpan="1"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <Image Name="ImgReference" Visibility="Hidden"
+                   Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2" Grid.RowSpan="1"
+                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                   Source="{StaticResource Ref_1}" Stretch="Uniform" Margin="15"/>
+            <Rectangle Name="TimerBG" Visibility="Hidden"
+                Width="450" Height="60" Fill="#6bd5d3" Opacity="0.5"
+                Grid.Column="2" Grid.ColumnSpan="2"
+                Grid.Row="2" Grid.RowSpan="2"
+                HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="78"/>
+            <Rectangle Name="Timer" Visibility="Hidden"
+                Width="450" Height="60" Fill="#33a3bc"
+                Grid.Column="2" Grid.ColumnSpan="2"
+                Grid.Row="2" Grid.RowSpan="2"
+                HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="78"/>
+            <Rectangle Name="FlashRect" Visibility="Visible"
+                       Opacity="0" Fill="#FFF"
+                       Grid.Column="0" Grid.ColumnSpan="6"
+                       Grid.Row="0" Grid.RowSpan="6" />
+        </Grid>
+    </k:KinectRegion>
+</Window>
