@@ -5,7 +5,11 @@ name = "pypi"
 
 [packages]
 tensorflow-gpu = "*"
+flask = "*"
+flask-restful = "*"
+flask-cors = "*"
 pillow = "*"
+gunicorn = "*"
 
 [dev-packages]
 

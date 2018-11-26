@@ -126,10 +126,10 @@ class FaceID:
     def __init__(self):
         self.model = faceIDNet()
 
-    def train(self, epochs, verbose=True):
+    def train(self, epochs, save_name, verbose=True):
         gen = generator(24)
         val_gen = val_generator(8)
-        cp_callback = ModelCheckpoint(os.path.join('saved_models','faceID_weights'), save_weights_only=True)
+        cp_callback = ModelCheckpoint(os.path.join('saved_models', save_name, 'faceID_weights'), save_weights_only=True)
         if verbose:
             with open('train_log.csv', mode='w') as log:
                 log = csv.writer(log, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
@@ -155,6 +155,6 @@ class FaceID:
         out = self.model.predict(inputs)
         return (out <= threshold)
 
-    def load(self, path):
-        self.model.load_weights(path)
+    def load(self, save_name):
+        self.model.load_weights(os.path.join('saved_models', save_name, 'faceID_weights'))
         print('--- Weights loaded ---')
