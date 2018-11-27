@@ -4,6 +4,7 @@
              xmlns:local="clr-namespace:IdentificationApp"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <FontFamily x:Key="Monserrat">pack:/Assets/Fonts/#Monserrat</FontFamily>
+        <BitmapImage x:Key="Alignment" UriSource="/Assets/Img/template.png" />
     </Application.Resources>
 </Application>

@@ -4,7 +4,6 @@
         xmlns:k="http://schemas.microsoft.com/kinect/2014"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:DataColletion.Source"
         Title="Data Recollection" 
         mc:Ignorable="d"
         d:DesignWidth="1280"
@@ -91,10 +90,10 @@
                 Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="4" Grid.RowSpan="3"
                 HorizontalAlignment="Center" VerticalAlignment="Center"
                 Source="{Binding ColorImageSource}" Stretch="Uniform" />
-            <Image Name="Template" Visibility="Hidden"
+            <Image Name="TemplateImage" Visibility="Hidden"
                 Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="4" Grid.RowSpan="3"
                 HorizontalAlignment="Center" VerticalAlignment="Center"
-                Source="{StaticResource Template}" Stretch="Uniform" />
+                Source="{StaticResource Alignment}" Stretch="Uniform" />
             <Path Name="BottomPanel" Visibility="Hidden"
                   Height="180" Width="880" Fill="#FFFFFF"
                   Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="4">

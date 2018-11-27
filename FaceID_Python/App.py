@@ -35,7 +35,7 @@ class Identify(Resource):
         sbj = args['subject']
         # img = Image.open(io.BytesIO(img))
         # text, boxes = od.detect(img, mode)
-        return {'match': True, 'identity': 'sbj-xx'}
+        return {'Match': True, 'Identity': 0}
 
 api.add_resource(CheckStatus, '/status')
 api.add_resource(Identify, '/id')

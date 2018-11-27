@@ -137,7 +137,7 @@ namespace DataColletion
                 BottomPanel.Visibility = Visibility.Visible;
                 BottomPanelText.Visibility = Visibility.Visible;
                 VideoCapture.Visibility = Visibility.Visible;
-                Template.Visibility = Visibility.Visible;
+                TemplateImage.Visibility = Visibility.Visible;
                 MainLabel.Visibility = Visibility.Collapsed;
             }
             else if (stage == CaptureStage.Alignment)
@@ -146,7 +146,7 @@ namespace DataColletion
                 capture.NewSubject();
                 CaptureData(0);
                 currentCapture = 1;
-                Template.Visibility = Visibility.Collapsed;
+                TemplateImage.Visibility = Visibility.Collapsed;
                 BottomPanelText.Text = "Imagenes de guia apareceran en la pantalla, por cada una intenta imitar la orientación de la cabeza mostrada en la imagen. Presiona continuar para empezar las capturas.";
                 ImgReference.Visibility = Visibility.Visible;
                 ImgReferenceBG.Visibility = Visibility.Visible;
