@@ -42,3 +42,5 @@ api.add_resource(Identify, '/id')
 
 if __name__ == '__main__':
     app.run(debug=False)
+
+    faceID.load('best')

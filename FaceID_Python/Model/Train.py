@@ -1,10 +1,10 @@
-import os
+import os, argparse
 from FaceID import FaceID
-from SampleGenerator import sample, sample_dr
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--save', help="Save folder")
+    args = vars(parser.parse_args())
 
     save_name = args['save']
 
@@ -13,4 +13,4 @@ if __name__ == "__main__":
 
     faceID = FaceID()
     faceID.model.summary()
-    faceID.train(40, save_name, verbose=False)
+    faceID.train(40, save_name, verbose=True)

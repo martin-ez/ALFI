@@ -8,7 +8,7 @@ from tensorflow.keras.regularizers import l2
 from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras import backend as K
 import numpy as np
-from SampleGenerator import sample, sample_dr, sample_both
+from SampleGenerator import sample_dc, sample_ds
 import csv, os
 
 def euclidean_distance(inputs):
@@ -35,7 +35,7 @@ def fire(x, squeeze=16, expand=64):
     return x
 
 def squeezeNet():
-    img_input=Input(shape=(200,200,4))
+    img_input=Input(shape=(100,100,4))
 
     x = Convolution2D(64, (5, 5), strides=(2, 2), padding='valid')(img_input)
     x = BatchNormalization()(x)
@@ -58,7 +58,7 @@ def squeezeNet():
     return Model(img_input, out)
 
 def faceIDNet():
-    im_in = Input(shape=(200,200,4))
+    im_in = Input(shape=(100,100,4))
 
     modelsqueeze = squeezeNet()
     x1 = modelsqueeze(im_in)
@@ -69,8 +69,8 @@ def faceIDNet():
     feat_x = Lambda(lambda  x: K.l2_normalize(x,axis=1))(feat_x)
     model_top = Model(inputs = [im_in], outputs = feat_x)
 
-    im_in1 = Input(shape=(200,200,4))
-    im_in2 = Input(shape=(200,200,4))
+    im_in1 = Input(shape=(100,100,4))
+    im_in2 = Input(shape=(100,100,4))
 
     feat_x1 = model_top(im_in1)
     feat_x2 = model_top(im_in2)
@@ -94,10 +94,10 @@ def generator(batch_size):
         switch=True
         for _ in range(batch_size):
             if switch:
-                x.append(sample(True, validation=False))
+                x.append(sample_dc(True, validation=False))
                 y.append(np.array([0.]))
             else:
-                x.append(sample(False, validation=False))
+                x.append(sample_dc(False, validation=False))
                 y.append(np.array([1.]))
             switch=not switch
         x = np.asarray(x)
@@ -111,10 +111,10 @@ def val_generator(batch_size):
         switch=True
         for _ in range(batch_size):
             if switch:
-                x.append(sample(True, validation=True))
+                x.append(sample_dc(True, validation=True))
                 y.append(np.array([0.]))
             else:
-                x.append(sample(False, validation=True))
+                x.append(sample_dc(False, validation=True))
                 y.append(np.array([1.]))
             switch=not switch
         x = np.asarray(x)
@@ -129,7 +129,10 @@ class FaceID:
     def train(self, epochs, save_name, verbose=True):
         gen = generator(24)
         val_gen = val_generator(8)
-        cp_callback = ModelCheckpoint(os.path.join('saved_models', save_name, 'faceID_weights'), save_weights_only=True)
+        save_folder = os.path.join(os.path.dirname(__file__), 'saved_models', save_name)
+        if not os.path.exists(save_folder):
+            os.makedirs(save_folder)
+        cp_callback = ModelCheckpoint( os.path.join(save_folder, 'faceID_weights'), save_weights_only=True)
         if verbose:
             with open('train_log.csv', mode='w') as log:
                 log = csv.writer(log, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
@@ -151,10 +154,10 @@ class FaceID:
             print('* - Loss val: '+str(lossVal))
 
     def predict(self, inputs, threshold=0.2):
-        inputs = [inputs[0,:].reshape((1,200,200,4)), inputs[1,:].reshape((1,200,200,4))]
+        inputs = [inputs[0,:].reshape((1,100,100,4)), inputs[1,:].reshape((1,100,100,4))]
         out = self.model.predict(inputs)
         return (out <= threshold)
 
     def load(self, save_name):
-        self.model.load_weights(os.path.join('saved_models', save_name, 'faceID_weights'))
+        self.model.load_weights(os.path.join(os.path.dirname(__file__), 'saved_models', save_name, 'faceID_weights'))
         print('--- Weights loaded ---')
