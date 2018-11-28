@@ -1,6 +1,8 @@
-import os
+import os, argparse
 from FaceID import FaceID
 from SampleGenerator import sample_dc, sample_ds
+
+th = 0.5
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -20,33 +22,32 @@ if __name__ == "__main__":
 
     for i in range(50):
         s = sample_dc(True, validation=True)
-        if faceID.predict(s, threshold=0.35):
+        if faceID.predict(s, threshold=th):
             correct_v = correct_v + 1;
 
     for i in range(50):
         s = sample_dc(False, validation=True)
-        if not faceID.predict(s, threshold=0.35):
+        if not faceID.predict(s, threshold=th):
             correct_f = correct_f + 1;
 
-    print('Correct dataset: '+str(correct_v+correct_f)+'/100')
+    print('Correct DC: '+str(correct_v+correct_f)+'/100')
     print('  - Correct pos: '+str(correct_v)+'/50')
     print('  - Correct neg: '+str(correct_f)+'/50')
 
     correct_v = 0
     correct_f = 0
 
-    '''
+
     for i in range(50):
-        s = sample_dr(True, validation=True)
-        if faceID.predict(s, threshold=0.35):
+        s = sample_ds(True, validation=True)
+        if faceID.predict(s, threshold=th):
             correct_v = correct_v + 1;
 
     for i in range(50):
-        s = sample_dr(False, validation=True)
-        if not faceID.predict(s, threshold=0.35):
+        s = sample_ds(False, validation=True)
+        if not faceID.predict(s, threshold=th):
             correct_f = correct_f + 1;
 
-    print('Correct DR: '+str(correct_v+correct_f)+'/100')
+    print('Correct DS: '+str(correct_v+correct_f)+'/100')
     print('  - Correct pos: '+str(correct_v)+'/50')
     print('  - Correct neg: '+str(correct_f)+'/50')
-    '''

@@ -4,6 +4,12 @@ from PIL import Image
 
 img_repo_path = os.path.join(os.path.dirname(__file__), 'data', 'repo')
 
+def sample_both(correct, validation=False):
+    if random.random() < 0.5:
+        return sample_dc(correct, validation=validation)
+    else:
+        return sample_ds(correct, validation=validation)
+
 def sample_dc(positive, validation=False):
     sbj1 = random.randint(0, 10)
     sbj2 = random.randint(0, 10)
@@ -23,8 +29,8 @@ def sample_dc(positive, validation=False):
     if positive:
         sbj2 = sbj1
 
-    sample1 = getRGBD(sbj1, no1, 'DC')
-    sample2 = getRGBD(sbj2, no2, 'DC')
+    sample1 = getRGBD(sbj1, no1, dataset='DC')
+    sample2 = getRGBD(sbj2, no2, dataset='DC')
 
     if sample1 is None or sample2 is None:
         return sample_dc(positive, validation=validation)
@@ -36,10 +42,10 @@ def sample_ds(positive, validation=False):
     sbj2 = random.randint(0, 25)
     while sbj1 == sbj2:
         sbj2 = random.randint(0, 25)
-    no1 = random.randint(0, 16)
-    no2 = random.randint(0, 16)
+    no1 = random.randint(1, 17)
+    no2 = random.randint(1, 17)
     while no1 == no2:
-        no2 = random.randint(0,16)
+        no2 = random.randint(1, 17)
 
     if validation:
         sbj1 = random.randint(26, 30)
@@ -50,85 +56,77 @@ def sample_ds(positive, validation=False):
     if positive:
         sbj2 = sbj1
 
-    sample1 = getRGBD(sbj1, no1, 'DS')
-    sample2 = getRGBD(sbj2, no2, 'DS')
+    sample1 = getRGBD(sbj1, no1, dataset='DS')
+    sample2 = getRGBD(sbj2, no2, dataset='DS')
+
+    if sample1 is None or sample2 is None:
+        return sample_dc(positive, validation=validation)
 
     return np.array([sample1, sample2])
 
 def sample_ir(sbj):
     return getRGBD(sbj, 0, 'IR')
 
-def getRGBD(sbjNo, imgNo, dataset='DC'):
-    color = getProcessColor(sbjNo, imgNo, dataset)
+def getRGBD(sbjNo, imgNo, dataset='DC', channel='depth'):
+    color = get_color(sbjNo, imgNo, dataset)
     if color is None:
         return None
-    depth = getProcessDepth(sbjNo, imgNo, dataset)
+    depth = get_channel(sbjNo, imgNo, dataset, channel=channel)
 
     rgbd = np.zeros((100,100,4))
-    if dataset == 'DS':
-        rgbd = np.zeros((200,200,4))
-
     rgbd[:,:,:3] = color[:,:,:3]
     rgbd[:,:,3] = depth
 
     return rgbd
 
-def getProcessColor(sbjNo, imgNo, dataset):
-    folder = os.path.join(os.path.dirname(__file__), 'data', dataset, 'sbj-'+str(sbjNo))
-    file = os.path.join(folder, 'cpt_'+str(imgNo)+'_color_i.png')
-    if dataset == 'DS':
-        prefix = '00'
-        if imgNo >= 9:
-            prefix = '0'
-        file = os.path.join(folder, prefix+str(imgNo+1)+'_2_c.bmp')
-    elif dataset == 'IR':
-        file = os.path.join(img_repo_path, 'sbj_'+str(sbjNo)+'_color.png')
+def getGDII(sbjNo, imgNo):
+    color = get_channel(sbjNo, imgNo, 'DC', channel='color')
+    if color is None:
+        return None
+    depth = get_channel(sbjNo, imgNo, 'DC', channel='depth')
+    infrared = get_channel(sbjNo, imgNo, 'DC', channel='infrared')
+    index = get_channel(sbjNo, imgNo, 'DC', channel='index')
+
+    gdii = np.zeros((100,100,4))
+    gdii[:,:,0] = color
+    gdii[:,:,1] = depth
+    gdii[:,:,2] = infrared
+    gdii[:,:,3] = index
+
+    return gdii
+
+def get_color(sbjNo, imgNo, dataset):
+    file = os.path.join(os.path.dirname(__file__), 'data', dataset, 'sbj-'+str(sbjNo), 'cpt_'+str(imgNo)+'_color.png')
+    if dataset == 'IR':
+        file = os.path.join(img_repo_path, 'sbj-'+str(sbjNo), 'cpt_'+str(imgNo)+'_color.png')
 
     try:
         color = Image.open(file)
+        return np.asarray(color)
     except:
         return None
 
-    if dataset == 'DS':
-        color = color.resize((640,480), Image.LANCZOS)
-        color = color.crop(box=(140, 220, 340, 420))
-        color = color.resize((100,100), Image.LANCZOS)
-        return np.asarray(color)
-    else:
-        color = color.resize((718,404), Image.LANCZOS)
-        color = color.crop(box=(309, 102, 409, 202))
-        return np.asarray(color)
+def get_channel(sbjNo, imgNo, dataset, channel='depth', normalize=False):
+    file = os.path.join(os.path.dirname(__file__), 'data', dataset, 'sbj-'+str(sbjNo), 'cpt_'+str(imgNo)+'_'+channel+'.png')
+    if dataset == 'IR':
+        file = os.path.join(img_repo_path, 'sbj-'+str(sbjNo), 'cpt_'+str(imgNo)+'_'+channel+'.png')
 
-def getProcessDepth(sbjNo, imgNo, dataset):
-    folder = os.path.join(os.path.dirname(__file__), 'data', dataset, 'sbj-'+str(sbjNo))
-    depth_file = os.path.join(folder, 'cpt_'+str(imgNo)+'_depth_d.dat')
-    mat=np.zeros((424,512), dtype='float32')
-    if dataset == 'DS':
-        mat=np.zeros((480,640), dtype='float32')
-        prefix = '00'
-        if imgNo >= 9:
-            prefix = '0'
-        depth_file = os.path.join(folder, prefix+str(imgNo+1)+'_2_d.dat')
-    elif dataset == 'IR':
-        file = os.path.join(img_repo_path, 'sbj_'+str(sbjNo)+'_depth.dat')
+    try:
+        img = Image.open(file)
+        if (channel == 'color'):
+            img = img.convert('L')
+        img, _, _ = img.split()
+        img = np.asarray(img)
+        if normalize:
+            return normalize(img)
+        else:
+            return img
+    except:
+        return None
 
-    i=0
-    j=0
-    with open(depth_file) as file:
-        for line in file:
-            vals = line.split('\t')
-            for val in vals:
-                if val == "\n": continue
-                mat[i][j]= int(val)
-                j+=1
-                if dataset == 'DS':
-                    j=j%640
-                else:
-                    j=j%512
-
-            i+=1
-
-    if dataset == 'DS':
-        return mat[140:340,220:420]
-    else:
-        return mat[190:290,102:202]
+def normalize(mat):
+    center = mat[50, 50]
+    for i in range(0,100):
+        for j in range(0,100):
+            mat[i, j] = mat[i, j] - center
+    return mat

@@ -8,7 +8,7 @@ from tensorflow.keras.regularizers import l2
 from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras import backend as K
 import numpy as np
-from SampleGenerator import sample_dc, sample_ds
+from SampleGenerator import sample_dc, sample_ds, sample_both
 import csv, os
 
 def euclidean_distance(inputs):
@@ -94,10 +94,10 @@ def generator(batch_size):
         switch=True
         for _ in range(batch_size):
             if switch:
-                x.append(sample_dc(True, validation=False))
+                x.append(sample_both(True, validation=False))
                 y.append(np.array([0.]))
             else:
-                x.append(sample_dc(False, validation=False))
+                x.append(sample_both(False, validation=False))
                 y.append(np.array([1.]))
             switch=not switch
         x = np.asarray(x)
@@ -111,10 +111,10 @@ def val_generator(batch_size):
         switch=True
         for _ in range(batch_size):
             if switch:
-                x.append(sample_dc(True, validation=True))
+                x.append(sample_both(True, validation=True))
                 y.append(np.array([0.]))
             else:
-                x.append(sample_dc(False, validation=True))
+                x.append(sample_both(False, validation=True))
                 y.append(np.array([1.]))
             switch=not switch
         x = np.asarray(x)
@@ -136,16 +136,16 @@ class FaceID:
         if verbose:
             with open('train_log.csv', mode='w') as log:
                 log = csv.writer(log, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-                e = 0
-                while e<epochs:
+                epoch = 0
+                while epoch<epochs:
                     self.model.fit_generator(gen, epochs=1, steps_per_epoch=30, callbacks=[cp_callback])
                     lossTrain = self.model.evaluate_generator(gen, steps=30)
                     lossVal = self.model.evaluate_generator(val_gen, steps=30, verbose=1)
-                    print('* Epoch: '+str(e))
+                    print('* Epoch: '+str(epoch))
                     print('* - Loss train: '+str(lossTrain))
                     print('* - Loss val: '+str(lossVal))
-                    log.writerow([e, lossTrain, lossVal])
-                    e=e+1
+                    log.writerow([epoch, lossTrain, lossVal])
+                    epoch=epoch+1
         else:
             self.model.fit_generator(gen, steps_per_epoch=30, epochs=epochs, validation_data = val_gen, validation_steps=20, callbacks=[cp_callback])
             lossTrain = self.model.evaluate_generator(gen, steps=30)
