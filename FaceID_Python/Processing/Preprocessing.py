@@ -88,6 +88,8 @@ def process_index(imgNo, in_path, out_path):
     index.save(os.path.join(out_path, 'cpt_'+str(imgNo)+'_index.png'))
 
 def preprocess(in_path, out_path, dataset, imgNo):
+    if not os.path.exists(out_path):
+        os.makedirs(out_path)
     process_color(imgNo, dataset, in_path, out_path)
     process_depth(imgNo, dataset, in_path, out_path)
     if dataset == 'DC':

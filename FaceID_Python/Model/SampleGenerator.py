@@ -2,8 +2,6 @@ import random, os
 import numpy as np
 from PIL import Image
 
-img_repo_path = os.path.join(os.path.dirname(__file__), 'data', 'repo')
-
 def sample_both(correct, validation=False):
     if random.random() < 0.5:
         return sample_dc(correct, validation=validation)
@@ -11,26 +9,24 @@ def sample_both(correct, validation=False):
         return sample_ds(correct, validation=validation)
 
 def sample_dc(positive, validation=False):
-    sbj1 = random.randint(0, 10)
-    sbj2 = random.randint(0, 10)
+    sbj1 = random.randint(0, 14)
+    sbj2 = random.randint(0, 14)
     while sbj1 == sbj2:
-        sbj2 = random.randint(0, 10)
-    no1 = random.randint(0, 8)
-    no2 = random.randint(0, 8)
+        sbj2 = random.randint(0, 14)
+    no1 = random.randint(1, 8)
+    no2 = random.randint(1, 8)
     while no1 == no2:
-        no2 = random.randint(0, 8)
+        no2 = random.randint(1, 8)
 
     if validation:
-        sbj1 = random.randint(11, 14)
-        sbj2 = random.randint(11, 14)
-        while sbj1 == sbj2:
-            sbj2 = random.randint(1, 14)
+        no1 = 0
+        no2 = random.randint(1, 8)
 
     if positive:
         sbj2 = sbj1
 
-    sample1 = getRGBD(sbj1, no1, dataset='DC')
-    sample2 = getRGBD(sbj2, no2, dataset='DC')
+    sample1 = getGDII(sbj1, no1)
+    sample2 = getGDII(sbj2, no2)
 
     if sample1 is None or sample2 is None:
         return sample_dc(positive, validation=validation)
@@ -38,10 +34,10 @@ def sample_dc(positive, validation=False):
     return np.array([sample1, sample2])
 
 def sample_ds(positive, validation=False):
-    sbj1 = random.randint(0, 25)
-    sbj2 = random.randint(0, 25)
+    sbj1 = random.randint(0, 30)
+    sbj2 = random.randint(0, 30)
     while sbj1 == sbj2:
-        sbj2 = random.randint(0, 25)
+        sbj2 = random.randint(0, 30)
     no1 = random.randint(1, 17)
     no2 = random.randint(1, 17)
     while no1 == no2:
@@ -60,12 +56,9 @@ def sample_ds(positive, validation=False):
     sample2 = getRGBD(sbj2, no2, dataset='DS')
 
     if sample1 is None or sample2 is None:
-        return sample_dc(positive, validation=validation)
+        return sample_ds(positive, validation=validation)
 
     return np.array([sample1, sample2])
-
-def sample_ir(sbj):
-    return getRGBD(sbj, 0, 'IR')
 
 def getRGBD(sbjNo, imgNo, dataset='DC', channel='depth'):
     color = get_color(sbjNo, imgNo, dataset)
@@ -115,7 +108,8 @@ def get_channel(sbjNo, imgNo, dataset, channel='depth', normalize=False):
         img = Image.open(file)
         if (channel == 'color'):
             img = img.convert('L')
-        img, _, _ = img.split()
+        else:
+            img, _, _ = img.split()
         img = np.asarray(img)
         if normalize:
             return normalize(img)

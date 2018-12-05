@@ -13,4 +13,4 @@ if __name__ == "__main__":
 
     faceID = FaceID()
     faceID.model.summary()
-    faceID.train(200, save_name, verbose=True)
+    faceID.train(60, save_name, verbose=True)

@@ -94,10 +94,10 @@ def generator(batch_size):
         switch=True
         for _ in range(batch_size):
             if switch:
-                x.append(sample_both(True, validation=False))
+                x.append(sample_dc(True, validation=False))
                 y.append(np.array([0.]))
             else:
-                x.append(sample_both(False, validation=False))
+                x.append(sample_dc(False, validation=False))
                 y.append(np.array([1.]))
             switch=not switch
         x = np.asarray(x)
@@ -111,10 +111,10 @@ def val_generator(batch_size):
         switch=True
         for _ in range(batch_size):
             if switch:
-                x.append(sample_both(True, validation=True))
+                x.append(sample_dc(True, validation=True))
                 y.append(np.array([0.]))
             else:
-                x.append(sample_both(False, validation=True))
+                x.append(sample_dc(False, validation=True))
                 y.append(np.array([1.]))
             switch=not switch
         x = np.asarray(x)
@@ -160,4 +160,5 @@ class FaceID:
 
     def load(self, save_name):
         self.model.load_weights(os.path.join(os.path.dirname(__file__), 'saved_models', save_name, 'faceID_weights'))
+        self.model._make_predict_function()
         print('--- Weights loaded ---')

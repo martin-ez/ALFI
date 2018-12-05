@@ -1,34 +1,63 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Windows.Media.Imaging;
 
 namespace IdentificationApp.Source
 {
     class DataCapture
     {
-        private static string BASE_DIR = @"Img_Repo";
-        private string subject;
-        private int currentSubject;
+        private static string BASE_DIR_Identify = Path.Combine(Path.GetPathRoot(Environment.CurrentDirectory), "ALFI_Img_Repo", "ToIdentify");
+        private static string BASE_DIR_Registry = Path.Combine(Path.GetPathRoot(Environment.CurrentDirectory), "ALFI_Img_Repo", "Registry");
+        private static string BASE_DIR_Process = Path.Combine(Path.GetPathRoot(Environment.CurrentDirectory), "ALFI_Img_Repo", "ToProcess");
+        private string subjectIdentify;
+        private string subjectRegistry;
+        private int currentSubjectRegistry;
+        private int currentSubjectIdentify;
 
         public DataCapture()
         {
-            currentSubject = 0;
+            currentSubjectIdentify = 0;
 
-            while (Directory.Exists(Path.Combine(BASE_DIR, "sbj-" + currentSubject)))
+            while (Directory.Exists(Path.Combine(BASE_DIR_Identify, "sbj-" + currentSubjectIdentify)))
             {
-                currentSubject += 1;
+                currentSubjectIdentify += 1;
             }
+            subjectIdentify = "sbj-" + currentSubjectIdentify;
+
+            currentSubjectRegistry = 0;
+
+            while (Directory.Exists(Path.Combine(BASE_DIR_Process, "sbj-" + currentSubjectRegistry)))
+            {
+                currentSubjectRegistry += 1;
+            }
+            subjectRegistry = "sbj-" + currentSubjectRegistry;
         }
 
-        public void NewSubject()
+        public int NewSubjectIdentify()
         {
-            subject = "sbj-" + currentSubject;
-            Directory.CreateDirectory(Path.Combine(BASE_DIR, subject));
-            currentSubject += 1;
+            int sbj = currentSubjectIdentify;
+            subjectIdentify = "sbj-" + sbj;
+            Directory.CreateDirectory(Path.Combine(BASE_DIR_Identify, subjectIdentify));
+            currentSubjectIdentify += 1;
+            return sbj;
         }
 
-        public void CaptureImage(WriteableBitmap image, string imageType, int capture)
+        public int NewSubjectRegistry()
         {
-            string filename = Path.Combine(BASE_DIR, subject, "cpt_" + capture + "_" + imageType + "_i.png");
+            int sbj = currentSubjectRegistry;
+            subjectRegistry = "sbj-" + sbj;
+            Directory.CreateDirectory(Path.Combine(BASE_DIR_Process, subjectRegistry));
+            currentSubjectRegistry += 1;
+            return sbj;
+        }
+
+        public void CaptureImage(WriteableBitmap image, string imageType, int capture, bool identify)
+        {
+            string filename = Path.Combine(BASE_DIR_Process, subjectRegistry, "cpt_" + capture + "_" + imageType + "_i.png");
+            if (identify)
+            {
+                filename = Path.Combine(BASE_DIR_Identify, subjectIdentify, "cpt_" + capture + "_" + imageType + "_i.png");
+            }
             using (FileStream stream = new FileStream(filename, FileMode.Create))
             {
                 PngBitmapEncoder encoder = new PngBitmapEncoder();
@@ -37,9 +66,13 @@ namespace IdentificationApp.Source
             }
         }
 
-        public void CaptureData(ushort[] data, string dataType, int capture, int width, int height)
+        public void CaptureData(ushort[] data, string dataType, int capture, int width, int height, bool identify)
         {
-            string filename = Path.Combine(BASE_DIR, subject, "cpt_" + capture + "_" + dataType + "_d.dat");
+            string filename = Path.Combine(BASE_DIR_Process, subjectRegistry, "cpt_" + capture + "_" + dataType + "_d.dat");
+            if (identify)
+            {
+                filename = Path.Combine(BASE_DIR_Identify, subjectIdentify, "cpt_" + capture + "_" + dataType + "_d.dat");
+            }
             using (FileStream fs = File.Create(filename))
             {
                 using (StreamWriter bw = new StreamWriter(fs))
@@ -48,7 +81,7 @@ namespace IdentificationApp.Source
                     {
                         for (int j = 0; j < width; j++)
                         {
-                            ushort value = data[(i*width) + j];
+                            ushort value = data[(i * width) + j];
                             bw.Write(value.ToString());
                             bw.Write('\t');
                         }
@@ -56,6 +89,11 @@ namespace IdentificationApp.Source
                     }
                 }
             }
+        }
+
+        public BitmapImage GetIdentityBitmap(int subject, int capture)
+        {
+            return new BitmapImage(new Uri(Path.Combine(BASE_DIR_Registry, "sbj-" + subject, "cpt_" + capture + "_color.png")));
         }
     }
 }

@@ -28,13 +28,13 @@ namespace IdentificationApp
         private KinectManager kinect = null;
         private DataCapture capture = null;
         private FaceID faceId = null;
+        private IdentifyCallback callback;
 
         private Storyboard flashAnimation;
 
         private Random rnd;
 
         private long nextCapture = 0;
-        private int captureCooldown = 3000;
 
         bool fullScreen = false;
         bool waitingToReturn = false;
@@ -44,10 +44,15 @@ namespace IdentificationApp
             Idle,
             Tracking,
             Capture,
-            Identification,
+            Identify,
             Matched,
             FirstTime,
-            End
+            Register,
+            Demo,
+            RegisterCaptures,
+            End,
+            BadMatch,
+            Training
         }
 
         CaptureStage stage = CaptureStage.Idle;
@@ -57,6 +62,7 @@ namespace IdentificationApp
             kinect = new KinectManager();
             capture = new DataCapture();
             faceId = new FaceID();
+            callback = new IdentifyCallback(this);
 
             rnd = new Random();
 
@@ -74,14 +80,6 @@ namespace IdentificationApp
 
         private void OnButtonKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.C && kinect.IsTracking() && DateTime.Now.Ticks > nextCapture)
-            {
-                capture.NewSubject();
-
-                CaptureData(0);
-
-                nextCapture = DateTime.Now.Ticks + captureCooldown;
-            }
             if (e.Key == Key.F11)
             {
                 if (fullScreen)
@@ -98,10 +96,6 @@ namespace IdentificationApp
                     ResizeMode = ResizeMode.NoResize;
                     fullScreen = true;
                 }
-            }
-            if (e.Key == Key.F)
-            {
-                FlashAnimation();
             }
         }
 
@@ -126,11 +120,10 @@ namespace IdentificationApp
             if (stage == CaptureStage.Tracking)
             {
                 stage = CaptureStage.Capture;
-                faceId.Identify(0, new IdentifyCallback());
                 SmallLabel.Visibility = Visibility.Collapsed;
-                StartButton.SetValue(Grid.RowProperty, 2);
-                ButtonLabel.SetValue(Grid.RowProperty, 2);
-                ButtonLabel.Text = "Continuar";
+                Button1.SetValue(Grid.RowProperty, 2);
+                Button1Label.SetValue(Grid.RowProperty, 2);
+                Button1Label.Text = "Continuar";
                 BottomPanel.Visibility = Visibility.Visible;
                 BottomPanelText.Visibility = Visibility.Visible;
                 VideoCapture.Visibility = Visibility.Visible;
@@ -139,11 +132,76 @@ namespace IdentificationApp
             }
             else if (stage == CaptureStage.Capture)
             {
-                stage = CaptureStage.Identification;
-                capture.NewSubject();
-                CaptureData(0);
+                stage = CaptureStage.Identify;
+                MainLabel.Visibility = Visibility.Visible;
+                MainLabel.Text = "Identificando...";
+                int sbj = capture.NewSubjectIdentify();
+                CaptureData(0, true);
+                faceId.Identify(sbj, callback);
                 TemplateImage.Visibility = Visibility.Collapsed;
-                BottomPanelText.Text = "Imagenes de guia apareceran en la pantalla, por cada una intenta imitar la orientación de la cabeza mostrada en la imagen. Presiona continuar para empezar las capturas.";
+                VideoCapture.Visibility = Visibility.Collapsed;
+                BottomPanel.Visibility = Visibility.Collapsed;
+                BottomPanelText.Visibility = Visibility.Collapsed;
+                Button1.Visibility = Visibility.Collapsed;
+                Button1Label.Visibility = Visibility.Collapsed;
+            }
+            else if (stage == CaptureStage.Matched)
+            {
+                stage = CaptureStage.End;
+                IdentityImage.Visibility = Visibility.Collapsed;
+                MainLabel.Visibility = Visibility.Visible;
+                MainLabel.Text = "Genial!";
+                Button1Label.Visibility = Visibility.Collapsed;
+                Button1.Visibility = Visibility.Collapsed;
+                Button2Label.Visibility = Visibility.Collapsed;
+                Button2.Visibility = Visibility.Collapsed;
+                BottomPanelText.Text = "Me alegra volver a verte. Muchas gracias por ayudarme a aprender.";
+            }
+            else if (stage == CaptureStage.BadMatch)
+            {
+                AskToRegister();
+            }
+            else if (stage == CaptureStage.FirstTime)
+            {
+                AskToRegister();
+            }
+            else if (stage == CaptureStage.Register)
+            {
+                stage = CaptureStage.Demo;
+                //TODO
+            }
+        }
+
+        private void OnNoButton(object sender, RoutedEventArgs e)
+        {
+            if (stage == CaptureStage.Matched)
+            {
+                stage = CaptureStage.BadMatch;
+                IdentityImage.Visibility = Visibility.Collapsed;
+                BottomPanelText.Text = "Perdon por confundirte. ¿Es la primera vez que te veo?";
+            }
+            else if (stage == CaptureStage.Register)
+            {
+                stage = CaptureStage.End;
+                MainLabel.Visibility = Visibility.Visible;
+                MainLabel.Text = "Muchas gracias por visitarme!";
+                Button1Label.Visibility = Visibility.Collapsed;
+                Button1.Visibility = Visibility.Collapsed;
+                Button2Label.Visibility = Visibility.Collapsed;
+                Button2.Visibility = Visibility.Collapsed;
+                BottomPanel.Visibility = Visibility.Collapsed;
+                BottomPanelText.Visibility = Visibility.Collapsed;
+            }
+            else if (stage == CaptureStage.FirstTime || stage == CaptureStage.BadMatch)
+            {
+                stage = CaptureStage.End;
+                MainLabel.Visibility = Visibility.Visible;
+                MainLabel.Text = "Lo siento :(";
+                Button1Label.Visibility = Visibility.Collapsed;
+                Button1.Visibility = Visibility.Collapsed;
+                Button2Label.Visibility = Visibility.Collapsed;
+                Button2.Visibility = Visibility.Collapsed;
+                BottomPanelText.Text = "Entrenare de nuevo para mejorar. Vuelve pronto!";
             }
         }
 
@@ -165,19 +223,18 @@ namespace IdentificationApp
         private void PersonEnterAnimation()
         {
             SmallLabel.Visibility = Visibility.Visible;
-            StartButton.Visibility = Visibility.Visible;
-            ButtonLabel.Visibility = Visibility.Visible;
+            Button1.Visibility = Visibility.Visible;
+            Button1Label.Visibility = Visibility.Visible;
             string[] fromGradient = { "#ff1f719b", "#ff238aad", "#ff33a3bc", "#ff4cbcc9", "#ff6bd5d3" };
             string[] toGradient = { "#ffd52941", "#ffe45f42", "#ffee894c", "#fff6b061", "#fffcd581" };
             UIAnimations.GradientAnimation(1.0, fromGradient, toGradient, BGCanvas);
-            UIAnimations.FadeInAnimation(1.0, new FrameworkElement[] { StartButton, ButtonLabel, SmallLabel });
+            UIAnimations.FadeInAnimation(1.0, new FrameworkElement[] { Button1, Button1Label, SmallLabel });
         }
 
         private void PersonLeave()
         {
             if (stage == CaptureStage.End || stage == CaptureStage.Tracking)
             {
-                stage = CaptureStage.Idle;
                 waitingToReturn = false;
                 PersonLeaveAnimation();
             }
@@ -190,11 +247,17 @@ namespace IdentificationApp
 
         private void PersonLeaveAnimation()
         {
-            ButtonLabel.Text = "Empezar";
-            ButtonLabel.SetValue(Grid.RowProperty, 3);
-            ButtonLabel.Visibility = Visibility.Collapsed;
-            StartButton.SetValue(Grid.RowProperty, 3);
-            StartButton.Visibility = Visibility.Collapsed;
+            stage = CaptureStage.Idle;
+            Button1Label.Text = "Empezar";
+            Button1Label.SetValue(Grid.RowProperty, 3);
+            Button1Label.Visibility = Visibility.Collapsed;
+            Button1.SetValue(Grid.RowProperty, 3);
+            Button1.Visibility = Visibility.Collapsed;
+            Button2Label.Text = "No";
+            Button2Label.SetValue(Grid.RowProperty, 3);
+            Button2Label.Visibility = Visibility.Collapsed;
+            Button2.SetValue(Grid.RowProperty, 3);
+            Button2.Visibility = Visibility.Collapsed;
             BottomPanel.Visibility = Visibility.Collapsed;
             BottomPanelText.Visibility = Visibility.Collapsed;
             BottomPanelText.Text = "Ubícate para que tu cabeza se alinee con la imagen. Presiona continuar cuando hayas terminado.";
@@ -203,6 +266,7 @@ namespace IdentificationApp
             MainLabel.Text = "¿Quieres ayudar a crear un algoritmo de identificación facial?";
             MainLabel.Visibility = Visibility.Visible;
             VideoCapture.Visibility = Visibility.Collapsed;
+            IdentityImage.Visibility = Visibility.Collapsed;
 
             string[] fromGradient = { "#ffd52941", "#ffe45f42", "#ffee894c", "#fff6b061", "#fffcd581" };
             string[] toGradient = { "#ff1f719b", "#ff238aad", "#ff33a3bc", "#ff4cbcc9", "#ff6bd5d3" };
@@ -225,40 +289,112 @@ namespace IdentificationApp
             {
                 this.Dispatcher.Invoke(() =>
                 {
-                    stage = CaptureStage.Idle;
                     waitingToReturn = false;
                     PersonLeaveAnimation();
                 });
             }
         }
 
-        private void CaptureData(int captureNumber)
+        private void CaptureData(int captureNumber, bool identify)
         {
             Rect irRect = kinect.GetInfraredRect();
 
-            capture.CaptureImage(kinect.GetBitmap(KinectManager.BitmapType.Color), "color", captureNumber);
-            capture.CaptureImage(kinect.GetBitmap(KinectManager.BitmapType.Depth), "depth", captureNumber);
-            capture.CaptureData(kinect.GetData(KinectManager.BitmapType.Depth), "depth", captureNumber, (int)irRect.Width, (int)irRect.Height);
-            capture.CaptureImage(kinect.GetBitmap(KinectManager.BitmapType.Infrared), "infrared", captureNumber);
-            capture.CaptureImage(kinect.GetBitmap(KinectManager.BitmapType.BodyIndex), "index", captureNumber);
+            capture.CaptureImage(kinect.GetBitmap(KinectManager.BitmapType.Color), "color", captureNumber, identify);
+            capture.CaptureImage(kinect.GetBitmap(KinectManager.BitmapType.Depth), "depth", captureNumber, identify);
+            capture.CaptureData(kinect.GetData(KinectManager.BitmapType.Depth), "depth", captureNumber, (int)irRect.Width, (int)irRect.Height, identify);
+            capture.CaptureImage(kinect.GetBitmap(KinectManager.BitmapType.Infrared), "infrared", captureNumber, identify);
+            capture.CaptureImage(kinect.GetBitmap(KinectManager.BitmapType.BodyIndex), "index", captureNumber, identify);
             FlashAnimation();
+        }
+
+        public void AskToRegister()
+        {
+            stage = CaptureStage.Register;
+            IdentityImage.Visibility = Visibility.Collapsed;
+            MainLabel.Visibility = Visibility.Visible;
+            MainLabel.Text = "Un gusto conocerte";
+            BottomPanelText.Text = "¿Me permitirias guardar fotos de ti para poder recordarte?";
+        }
+
+        public void Matched(int subject)
+        {
+            if (stage == CaptureStage.Identify)
+            {             
+                this.Dispatcher.Invoke(() =>
+                {
+                    stage = CaptureStage.Matched;
+                    IdentityImage.Source = capture.GetIdentityBitmap(subject, 0);
+                    IdentityImage.Visibility = Visibility.Visible;
+                    MainLabel.Visibility = Visibility.Collapsed;
+                    Button1Label.Text = "Si";
+                    Button1Label.SetValue(Grid.RowProperty, 2);
+                    Button1Label.Visibility = Visibility.Visible;
+                    Button1.SetValue(Grid.RowProperty, 2);
+                    Button1.Visibility = Visibility.Visible;
+                    Button2Label.Text = "No";
+                    Button2Label.SetValue(Grid.RowProperty, 2);
+                    Button2Label.Visibility = Visibility.Visible;
+                    Button2.SetValue(Grid.RowProperty, 2);
+                    Button2.Visibility = Visibility.Visible;
+                    BottomPanel.Visibility = Visibility.Visible;
+                    BottomPanelText.Visibility = Visibility.Visible;
+                    BottomPanelText.Text = "Pienso que ya te conozco. ¿Eres tu la persona de esta foto?";
+                });      
+            }
+        }
+
+        public void FirstTime()
+        {
+            if (stage == CaptureStage.Identify)
+            {
+                this.Dispatcher.Invoke(() =>
+                {
+                    stage = CaptureStage.FirstTime;
+                    MainLabel.Text = "Eres nuevo";
+                    Button1Label.Text = "Si";
+                    Button1Label.SetValue(Grid.RowProperty, 2);
+                    Button1Label.Visibility = Visibility.Visible;
+                    Button1.SetValue(Grid.RowProperty, 2);
+                    Button1.Visibility = Visibility.Visible;
+                    Button2Label.Text = "No";
+                    Button2Label.SetValue(Grid.RowProperty, 2);
+                    Button2Label.Visibility = Visibility.Visible;
+                    Button2.SetValue(Grid.RowProperty, 2);
+                    Button2.Visibility = Visibility.Visible;
+                    BottomPanel.Visibility = Visibility.Visible;
+                    BottomPanelText.Visibility = Visibility.Visible;
+                    BottomPanelText.Text = "Pienso que no te conozco. ¿Es la primera vez que te veo?";
+                });
+            }
+        }
+
+        public void FaceIDError()
+        {
+            //TODO: PANIC
         }
 
         public class IdentifyCallback : IFaceIDCallback
         {
-            public void Match(string subject)
+            public MainWindow main;
+
+            public IdentifyCallback(MainWindow from)
             {
-                Console.WriteLine(subject);
+                main = from;
+            }
+
+            public void Match(int subject)
+            {
+                main.Matched(subject);
             }
 
             public void FirstTime()
             {
-                Console.WriteLine("First Time");
+                main.FirstTime();
             }
 
             public void Error(string error)
             {
-                Console.WriteLine(error);
+                main.FaceIDError();
             }
         }
     }
