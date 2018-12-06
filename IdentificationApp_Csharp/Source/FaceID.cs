@@ -13,7 +13,6 @@ namespace IdentificationApp.Source
     {
         void Match(int subject);
         void FirstTime();
-        void Error(string error);
     }
 
     class FaceID
@@ -39,10 +38,27 @@ namespace IdentificationApp.Source
                     if (response.Data.Match) callback.Match(response.Data.Identity);
                     else callback.FirstTime();
                 }
-                else
-                {
-                    callback.Error(response.ErrorMessage);
-                }
+            });
+        }
+
+        public void Process(int subject)
+        {
+            var request = new RestRequest("process", Method.GET);
+            request.AddParameter("subject", subject);
+
+            var asyncHandle = client.ExecuteAsync<FaceIDResponse>(request, response =>
+            {
+                return;
+            });
+        }
+
+        public void Train()
+        {
+            var request = new RestRequest("train", Method.GET);
+            var asyncHandle = client.ExecuteAsync<FaceIDResponse>(request, response =>
+            {
+                //TODO Wait for end
+                return;
             });
         }
     }

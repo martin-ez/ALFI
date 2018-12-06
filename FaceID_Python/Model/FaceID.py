@@ -87,34 +87,34 @@ def faceIDNet():
 
     return model_final
 
-def generator(batch_size):
+def generator(batch_size, subjects):
     while 1:
         x=[]
         y=[]
         switch=True
         for _ in range(batch_size):
             if switch:
-                x.append(sample_dc(True, validation=False))
+                x.append(sample_dc(True, subjects, validation=False))
                 y.append(np.array([0.]))
             else:
-                x.append(sample_dc(False, validation=False))
+                x.append(sample_dc(False, subjects, validation=False))
                 y.append(np.array([1.]))
             switch=not switch
         x = np.asarray(x)
         y = np.asarray(y)
         yield [x[:,0],x[:,1]],y
 
-def val_generator(batch_size):
+def val_generator(batch_size, subjects):
     while 1:
         x=[]
         y=[]
         switch=True
         for _ in range(batch_size):
             if switch:
-                x.append(sample_dc(True, validation=True))
+                x.append(sample_dc(True, subjects, validation=True))
                 y.append(np.array([0.]))
             else:
-                x.append(sample_dc(False, validation=True))
+                x.append(sample_dc(False, subjects, validation=True))
                 y.append(np.array([1.]))
             switch=not switch
         x = np.asarray(x)
@@ -126,9 +126,9 @@ class FaceID:
     def __init__(self):
         self.model = faceIDNet()
 
-    def train(self, epochs, save_name, verbose=True):
-        gen = generator(24)
-        val_gen = val_generator(8)
+    def train(self, epochs, subjects, save_name, verbose=True):
+        gen = generator(24, subjects)
+        val_gen = val_generator(8, subjects)
         save_folder = os.path.join(os.path.dirname(__file__), 'saved_models', save_name)
         if not os.path.exists(save_folder):
             os.makedirs(save_folder)

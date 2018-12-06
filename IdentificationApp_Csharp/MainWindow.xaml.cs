@@ -35,6 +35,8 @@ namespace IdentificationApp
         private Random rnd;
 
         private long nextCapture = 0;
+        int currentCapture = -1;
+        int subjectToProcess;
 
         bool fullScreen = false;
         bool waitingToReturn = false;
@@ -168,7 +170,36 @@ namespace IdentificationApp
             else if (stage == CaptureStage.Register)
             {
                 stage = CaptureStage.Demo;
-                //TODO
+                MainLabel.Visibility = Visibility.Collapsed;
+                TemplateImage.Visibility = Visibility.Collapsed;
+                BottomPanelText.Text = "Imagenes de guia apareceran en la pantalla, por cada una intenta imitar la orientación de la cabeza mostrada en la imagen. Presiona continuar para empezar las capturas.";
+                ImgReference.Visibility = Visibility.Visible;
+                ImgReferenceBG.Visibility = Visibility.Visible;
+                Button2.Visibility = Visibility.Collapsed;
+                Button2Label.Visibility = Visibility.Collapsed;
+                BottomPanel.SetValue(Grid.RowProperty, 3);
+                BottomPanelText.SetValue(Grid.RowProperty, 3);
+                Button1Label.SetValue(Grid.RowProperty, 2);
+                Button1.SetValue(Grid.RowProperty, 2);
+                Button2Label.SetValue(Grid.RowProperty, 2);
+                Button2.SetValue(Grid.RowProperty, 2);
+                VideoCapture.Visibility = Visibility.Visible;
+                TemplateImage.Visibility = Visibility.Visible;
+                DemoReel();
+            }
+            else if (stage == CaptureStage.Demo)
+            {
+                stage = CaptureStage.RegisterCaptures;
+                subjectToProcess = capture.NewSubjectRegistry();
+                CaptureData(0, false);
+                currentCapture = 1;
+                Button1.Visibility = Visibility.Collapsed;
+                Button1Label.Visibility = Visibility.Collapsed;
+                BottomPanel.Visibility = Visibility.Collapsed;
+                BottomPanelText.Visibility = Visibility.Collapsed;
+                TemplateImage.Visibility = Visibility.Collapsed;
+                ImgReference.Source = (ImageSource)FindResource("Ref_1");
+                Task.Delay(3000).ContinueWith(t => NextCapture());
             }
         }
 
@@ -178,7 +209,14 @@ namespace IdentificationApp
             {
                 stage = CaptureStage.BadMatch;
                 IdentityImage.Visibility = Visibility.Collapsed;
-                BottomPanelText.Text = "Perdon por confundirte. ¿Es la primera vez que te veo?";
+                MainLabel.Visibility = Visibility.Visible;
+                MainLabel.Text = "Perdon por confundirte. ¿Es la primera vez que te veo?";
+                BottomPanel.Visibility = Visibility.Collapsed;
+                BottomPanelText.Visibility = Visibility.Collapsed;
+                Button1.SetValue(Grid.RowProperty, 3);
+                Button1Label.SetValue(Grid.RowProperty, 3);
+                Button2.SetValue(Grid.RowProperty, 3);
+                Button2Label.SetValue(Grid.RowProperty, 3);
             }
             else if (stage == CaptureStage.Register)
             {
@@ -201,7 +239,11 @@ namespace IdentificationApp
                 Button1.Visibility = Visibility.Collapsed;
                 Button2Label.Visibility = Visibility.Collapsed;
                 Button2.Visibility = Visibility.Collapsed;
+                BottomPanel.Visibility = Visibility.Visible;
+                BottomPanelText.Visibility = Visibility.Visible;
                 BottomPanelText.Text = "Entrenare de nuevo para mejorar. Vuelve pronto!";
+                BottomPanel.SetValue(Grid.RowProperty, 3);
+                BottomPanelText.SetValue(Grid.RowProperty, 3);
             }
         }
 
@@ -249,14 +291,10 @@ namespace IdentificationApp
         {
             stage = CaptureStage.Idle;
             Button1Label.Text = "Empezar";
-            Button1Label.SetValue(Grid.RowProperty, 3);
             Button1Label.Visibility = Visibility.Collapsed;
-            Button1.SetValue(Grid.RowProperty, 3);
             Button1.Visibility = Visibility.Collapsed;
             Button2Label.Text = "No";
-            Button2Label.SetValue(Grid.RowProperty, 3);
             Button2Label.Visibility = Visibility.Collapsed;
-            Button2.SetValue(Grid.RowProperty, 3);
             Button2.Visibility = Visibility.Collapsed;
             BottomPanel.Visibility = Visibility.Collapsed;
             BottomPanelText.Visibility = Visibility.Collapsed;
@@ -267,6 +305,14 @@ namespace IdentificationApp
             MainLabel.Visibility = Visibility.Visible;
             VideoCapture.Visibility = Visibility.Collapsed;
             IdentityImage.Visibility = Visibility.Collapsed;
+            ImgReference.Visibility = Visibility.Collapsed;
+            ImgReferenceBG.Visibility = Visibility.Collapsed;
+            BottomPanel.SetValue(Grid.RowProperty, 3);
+            BottomPanelText.SetValue(Grid.RowProperty, 3);
+            Button1Label.SetValue(Grid.RowProperty, 3);
+            Button1.SetValue(Grid.RowProperty, 3);
+            Button2Label.SetValue(Grid.RowProperty, 3);
+            Button2.SetValue(Grid.RowProperty, 3);
 
             string[] fromGradient = { "#ffd52941", "#ffe45f42", "#ffee894c", "#fff6b061", "#fffcd581" };
             string[] toGradient = { "#ff1f719b", "#ff238aad", "#ff33a3bc", "#ff4cbcc9", "#ff6bd5d3" };
@@ -295,6 +341,46 @@ namespace IdentificationApp
             }
         }
 
+        void DemoReel()
+        {
+            if (stage == CaptureStage.Demo)
+            {
+                this.Dispatcher.Invoke(() =>
+                {
+                    ImgReference.Source = (ImageSource)FindResource("Ref_" + rnd.Next(1, 9));
+                    Task.Delay(1000).ContinueWith(t => DemoReel());
+                });
+            }
+        }
+
+        private void NextCapture()
+        {
+            this.Dispatcher.Invoke(() =>
+            {
+                if (currentCapture < 9) CaptureData(currentCapture, false);
+
+                currentCapture += 1;
+                if (currentCapture < 9 && stage == CaptureStage.RegisterCaptures)
+                {
+                    ImgReference.Source = (ImageSource)FindResource("Ref_" + currentCapture);
+                    Task.Delay(3000).ContinueWith(t => NextCapture());
+                }
+                else if (currentCapture == 9 && stage == CaptureStage.RegisterCaptures)
+                {
+                    stage = CaptureStage.End;
+                    faceId.Process(subjectToProcess);
+                    VideoCapture.Visibility = Visibility.Collapsed;
+                    ImgReference.Visibility = Visibility.Collapsed;
+                    ImgReferenceBG.Visibility = Visibility.Collapsed;
+                    MainLabel.Visibility = Visibility.Visible;
+                    MainLabel.Text = "Muchas Gracias!";
+                    BottomPanel.Visibility = Visibility.Visible;
+                    BottomPanelText.Visibility = Visibility.Visible;
+                    BottomPanelText.Text = "Regresa otro dia y te reconocere.";
+                }
+            });
+        }
+
         private void CaptureData(int captureNumber, bool identify)
         {
             Rect irRect = kinect.GetInfraredRect();
@@ -312,14 +398,16 @@ namespace IdentificationApp
             stage = CaptureStage.Register;
             IdentityImage.Visibility = Visibility.Collapsed;
             MainLabel.Visibility = Visibility.Visible;
-            MainLabel.Text = "Un gusto conocerte";
+            MainLabel.Text = "Es un gusto conocerte";
             BottomPanelText.Text = "¿Me permitirias guardar fotos de ti para poder recordarte?";
+            BottomPanel.Visibility = Visibility.Visible;
+            BottomPanelText.Visibility = Visibility.Visible;
         }
 
         public void Matched(int subject)
         {
             if (stage == CaptureStage.Identify)
-            {             
+            {
                 this.Dispatcher.Invoke(() =>
                 {
                     stage = CaptureStage.Matched;
@@ -327,19 +415,21 @@ namespace IdentificationApp
                     IdentityImage.Visibility = Visibility.Visible;
                     MainLabel.Visibility = Visibility.Collapsed;
                     Button1Label.Text = "Si";
-                    Button1Label.SetValue(Grid.RowProperty, 2);
                     Button1Label.Visibility = Visibility.Visible;
-                    Button1.SetValue(Grid.RowProperty, 2);
                     Button1.Visibility = Visibility.Visible;
                     Button2Label.Text = "No";
-                    Button2Label.SetValue(Grid.RowProperty, 2);
                     Button2Label.Visibility = Visibility.Visible;
-                    Button2.SetValue(Grid.RowProperty, 2);
                     Button2.Visibility = Visibility.Visible;
                     BottomPanel.Visibility = Visibility.Visible;
                     BottomPanelText.Visibility = Visibility.Visible;
                     BottomPanelText.Text = "Pienso que ya te conozco. ¿Eres tu la persona de esta foto?";
-                });      
+                    BottomPanel.SetValue(Grid.RowProperty, 2);
+                    BottomPanelText.SetValue(Grid.RowProperty, 2);
+                    Button1Label.SetValue(Grid.RowProperty, 3);
+                    Button1.SetValue(Grid.RowProperty, 3);
+                    Button2Label.SetValue(Grid.RowProperty, 3);
+                    Button2.SetValue(Grid.RowProperty, 3);
+                });
             }
         }
 
@@ -352,25 +442,22 @@ namespace IdentificationApp
                     stage = CaptureStage.FirstTime;
                     MainLabel.Text = "Eres nuevo";
                     Button1Label.Text = "Si";
-                    Button1Label.SetValue(Grid.RowProperty, 2);
                     Button1Label.Visibility = Visibility.Visible;
-                    Button1.SetValue(Grid.RowProperty, 2);
                     Button1.Visibility = Visibility.Visible;
                     Button2Label.Text = "No";
-                    Button2Label.SetValue(Grid.RowProperty, 2);
                     Button2Label.Visibility = Visibility.Visible;
-                    Button2.SetValue(Grid.RowProperty, 2);
                     Button2.Visibility = Visibility.Visible;
                     BottomPanel.Visibility = Visibility.Visible;
                     BottomPanelText.Visibility = Visibility.Visible;
                     BottomPanelText.Text = "Pienso que no te conozco. ¿Es la primera vez que te veo?";
+                    BottomPanel.SetValue(Grid.RowProperty, 2);
+                    BottomPanelText.SetValue(Grid.RowProperty, 2);
+                    Button1Label.SetValue(Grid.RowProperty, 3);
+                    Button1.SetValue(Grid.RowProperty, 3);
+                    Button2Label.SetValue(Grid.RowProperty, 3);
+                    Button2.SetValue(Grid.RowProperty, 3);
                 });
             }
-        }
-
-        public void FaceIDError()
-        {
-            //TODO: PANIC
         }
 
         public class IdentifyCallback : IFaceIDCallback
@@ -390,11 +477,6 @@ namespace IdentificationApp
             public void FirstTime()
             {
                 main.FirstTime();
-            }
-
-            public void Error(string error)
-            {
-                main.FaceIDError();
             }
         }
     }

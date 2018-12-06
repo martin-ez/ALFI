@@ -1,10 +1,4 @@
-﻿//------------------------------------------------------------------------------
-// <copyright file="MainWindow.xaml.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
-// </copyright>
-//------------------------------------------------------------------------------
-
-namespace DataColletion
+﻿namespace DataColletion
 {
     using System;
     using System.ComponentModel;

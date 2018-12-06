@@ -8,15 +8,15 @@ def sample_both(correct, validation=False):
     else:
         return sample_ds(correct, validation=validation)
 
-def sample_dc(positive, validation=False):
-    sbj1 = random.randint(0, 14)
-    sbj2 = random.randint(0, 14)
+def sample_dc(positive, subjects, validation=False):
+    sbj1 = random.randint(0, subjects)
+    sbj2 = random.randint(0, subjects)
     while sbj1 == sbj2:
-        sbj2 = random.randint(0, 14)
-    no1 = random.randint(1, 8)
-    no2 = random.randint(1, 8)
+        sbj2 = random.randint(0, subjects)
+    no1 = random.randint(0, 8)
+    no2 = random.randint(0, 8)
     while no1 == no2:
-        no2 = random.randint(1, 8)
+        no2 = random.randint(0, 8)
 
     if validation:
         no1 = 0

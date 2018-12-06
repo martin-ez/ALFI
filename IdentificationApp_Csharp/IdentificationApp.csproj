@@ -121,5 +121,29 @@
   <ItemGroup>
     <Resource Include="Assets\Img\template.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\Img\1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\Img\2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\Img\3.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\Img\4.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\Img\5.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\Img\6.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\Img\7.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\Img\8.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

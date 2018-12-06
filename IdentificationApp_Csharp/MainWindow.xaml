@@ -67,10 +67,10 @@
                 Grid.Column="0" Grid.ColumnSpan="6" Grid.Row="0" Grid.RowSpan="6"
                 Background="{StaticResource BGGradientBrush}"/>
             <TextBlock Name="MainLabel" Visibility="Visible"
+                   Margin="0, 0, 0, 100"
                    Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="4" Grid.RowSpan="2"
                    FontSize="92" FontWeight="Regular" Foreground="#FFF"
-                   TextAlignment="Center"
-                   VerticalAlignment="Center" HorizontalAlignment="Center"
+                   TextAlignment="Center" VerticalAlignment="Center" HorizontalAlignment="Center"
                    TextWrapping="Wrap" FontFamily="{StaticResource Monserrat}"
                    Text="Hola!&#x0a;¿Ya me conoces?" />
             <TextBlock Name="SmallLabel" Visibility="Hidden"
@@ -95,6 +95,14 @@
                 Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="4" Grid.RowSpan="3"
                 HorizontalAlignment="Center" VerticalAlignment="Center"
                 Source="{StaticResource Alignment}" Stretch="Uniform" />
+            <Rectangle Name="ImgReferenceBG" Visibility="Hidden"
+                       Fill="#FFF" Width="200" Height="200"
+                       Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2" Grid.RowSpan="1"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <Image Name="ImgReference" Visibility="Hidden"
+                   Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2" Grid.RowSpan="1"
+                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                   Source="{StaticResource Ref_1}" Stretch="Uniform" Margin="15"/>
             <Path Name="BottomPanel" Visibility="Hidden"
                   Height="180" Width="880" Fill="#FFFFFF"
                   Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="4">
