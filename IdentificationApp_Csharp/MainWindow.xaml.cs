@@ -34,7 +34,6 @@ namespace IdentificationApp
 
         private Random rnd;
 
-        private long nextCapture = 0;
         int currentCapture = -1;
         int subjectToProcess;
 
@@ -304,6 +303,7 @@ namespace IdentificationApp
             MainLabel.Text = "¿Quieres ayudar a crear un algoritmo de identificación facial?";
             MainLabel.Visibility = Visibility.Visible;
             VideoCapture.Visibility = Visibility.Collapsed;
+            TemplateImage.Visibility = Visibility.Visible;
             IdentityImage.Visibility = Visibility.Collapsed;
             ImgReference.Visibility = Visibility.Collapsed;
             ImgReferenceBG.Visibility = Visibility.Collapsed;

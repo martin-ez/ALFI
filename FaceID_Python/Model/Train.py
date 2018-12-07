@@ -9,8 +9,8 @@ if __name__ == "__main__":
     save_name = args['save']
 
     if not save_name:
-        save_name = 'model_weigths'
+        save_name = 'training'
 
     faceID = FaceID()
     faceID.model.summary()
-    faceID.train(60, 14, save_name, verbose=True)
+    faceID.train(100, save_name)

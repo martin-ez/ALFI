@@ -8,7 +8,7 @@ from tensorflow.keras.regularizers import l2
 from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras import backend as K
 import numpy as np
-from SampleGenerator import sample_dc, sample_ds, sample_both
+from SampleGenerator import sample
 import csv, os
 
 def euclidean_distance(inputs):
@@ -87,34 +87,17 @@ def faceIDNet():
 
     return model_final
 
-def generator(batch_size, subjects):
+def generator(batch_size, subjects, paths):
     while 1:
         x=[]
         y=[]
         switch=True
         for _ in range(batch_size):
             if switch:
-                x.append(sample_dc(True, subjects, validation=False))
+                x.append(sample(True, subjects, paths))
                 y.append(np.array([0.]))
             else:
-                x.append(sample_dc(False, subjects, validation=False))
-                y.append(np.array([1.]))
-            switch=not switch
-        x = np.asarray(x)
-        y = np.asarray(y)
-        yield [x[:,0],x[:,1]],y
-
-def val_generator(batch_size, subjects):
-    while 1:
-        x=[]
-        y=[]
-        switch=True
-        for _ in range(batch_size):
-            if switch:
-                x.append(sample_dc(True, subjects, validation=True))
-                y.append(np.array([0.]))
-            else:
-                x.append(sample_dc(False, subjects, validation=True))
+                x.append(sample(False, subjects, paths))
                 y.append(np.array([1.]))
             switch=not switch
         x = np.asarray(x)
@@ -125,33 +108,26 @@ class FaceID:
 
     def __init__(self):
         self.model = faceIDNet()
+        self.to_identify_path = os.path.join(os.path.abspath(os.sep), 'ALFI_Data','To_Identify', 'Raw')
+        self.to_identify_processed_path = os.path.join(os.path.abspath(os.sep), 'ALFI_Data','To_Identify', 'Processed')
+        self.to_process_path = os.path.join(os.path.abspath(os.sep), 'ALFI_Data','To_Process')
+        self.dataset_path = os.path.join(os.path.abspath(os.sep), 'ALFI_Data','Dataset','DC')
+        self.dataset_ds_path = os.path.join(os.path.abspath(os.sep), 'ALFI_Data','Dataset','DS')
+        self.weigths_path = os.path.join(os.path.abspath(os.sep), 'ALFI_Data','Weigths')
 
-    def train(self, epochs, subjects, save_name, verbose=True):
-        gen = generator(24, subjects)
-        val_gen = val_generator(8, subjects)
-        save_folder = os.path.join(os.path.dirname(__file__), 'saved_models', save_name)
+        self.current_sbj = 0
+        while(os.path.exists(os.path.join(self.dataset_path,'sbj-'+str(self.current_sbj)))):
+            self.current_sbj = self.current_sbj + 1
+
+    def train(self, epochs, save_name):
+        gen = generator(24, self.current_sbj-1, [self.dataset_path, self.dataset_ds_path])
+        save_folder = os.path.join(self.weigths_path, save_name)
         if not os.path.exists(save_folder):
             os.makedirs(save_folder)
         cp_callback = ModelCheckpoint( os.path.join(save_folder, 'faceID_weights'), save_weights_only=True)
-        if verbose:
-            with open('train_log.csv', mode='w') as log:
-                log = csv.writer(log, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-                epoch = 0
-                while epoch<epochs:
-                    self.model.fit_generator(gen, epochs=1, steps_per_epoch=30, callbacks=[cp_callback])
-                    lossTrain = self.model.evaluate_generator(gen, steps=30)
-                    lossVal = self.model.evaluate_generator(val_gen, steps=30, verbose=1)
-                    print('* Epoch: '+str(epoch))
-                    print('* - Loss train: '+str(lossTrain))
-                    print('* - Loss val: '+str(lossVal))
-                    log.writerow([epoch, lossTrain, lossVal])
-                    epoch=epoch+1
-        else:
-            self.model.fit_generator(gen, steps_per_epoch=30, epochs=epochs, validation_data = val_gen, validation_steps=20, callbacks=[cp_callback])
-            lossTrain = self.model.evaluate_generator(gen, steps=30)
-            lossVal = self.model.evaluate_generator(val_gen, steps=30)
-            print('* - Loss train: '+str(lossTrain))
-            print('* - Loss val: '+str(lossVal))
+        self.model.fit_generator(gen, steps_per_epoch=30, epochs=epochs, validation_steps=20, callbacks=[cp_callback])
+        lossTrain = self.model.evaluate_generator(gen, steps=30)
+        print('* - Loss: '+str(lossTrain))
 
     def predict(self, inputs, threshold=0.2):
         inputs = [inputs[0,:].reshape((1,100,100,4)), inputs[1,:].reshape((1,100,100,4))]
@@ -159,6 +135,6 @@ class FaceID:
         return (out <= threshold)
 
     def load(self, save_name):
-        self.model.load_weights(os.path.join(os.path.dirname(__file__), 'saved_models', save_name, 'faceID_weights'))
+        self.model.load_weights(os.path.join(self.weigths_path, save_name, 'faceID_weights'))
         self.model._make_predict_function()
         print('--- Weights loaded ---')

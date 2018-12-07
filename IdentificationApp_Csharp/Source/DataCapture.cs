@@ -6,9 +6,9 @@ namespace IdentificationApp.Source
 {
     class DataCapture
     {
-        private static string BASE_DIR_Identify = Path.Combine(Path.GetPathRoot(Environment.CurrentDirectory), "ALFI_Img_Repo", "ToIdentify");
-        private static string BASE_DIR_Registry = Path.Combine(Path.GetPathRoot(Environment.CurrentDirectory), "ALFI_Img_Repo", "Registry");
-        private static string BASE_DIR_Process = Path.Combine(Path.GetPathRoot(Environment.CurrentDirectory), "ALFI_Img_Repo", "ToProcess");
+        private static readonly string IdentifyPath = Path.Combine(Path.GetPathRoot(Environment.CurrentDirectory), "ALFI_Data", "To_Identify");
+        private static readonly string ProcessPath = Path.Combine(Path.GetPathRoot(Environment.CurrentDirectory), "ALFI_Data", "To_Process");
+        private static readonly string DatasetPath = Path.Combine(Path.GetPathRoot(Environment.CurrentDirectory), "ALFI_Data", "Dataset", "DC");
         private string subjectIdentify;
         private string subjectRegistry;
         private int currentSubjectRegistry;
@@ -18,7 +18,7 @@ namespace IdentificationApp.Source
         {
             currentSubjectIdentify = 0;
 
-            while (Directory.Exists(Path.Combine(BASE_DIR_Identify, "sbj-" + currentSubjectIdentify)))
+            while (Directory.Exists(Path.Combine(IdentifyPath, "sbj-" + currentSubjectIdentify)))
             {
                 currentSubjectIdentify += 1;
             }
@@ -26,7 +26,7 @@ namespace IdentificationApp.Source
 
             currentSubjectRegistry = 0;
 
-            while (Directory.Exists(Path.Combine(BASE_DIR_Process, "sbj-" + currentSubjectRegistry)))
+            while (Directory.Exists(Path.Combine(ProcessPath, "sbj-" + currentSubjectRegistry)))
             {
                 currentSubjectRegistry += 1;
             }
@@ -37,7 +37,7 @@ namespace IdentificationApp.Source
         {
             int sbj = currentSubjectIdentify;
             subjectIdentify = "sbj-" + sbj;
-            Directory.CreateDirectory(Path.Combine(BASE_DIR_Identify, subjectIdentify));
+            Directory.CreateDirectory(Path.Combine(IdentifyPath, subjectIdentify));
             currentSubjectIdentify += 1;
             return sbj;
         }
@@ -46,17 +46,17 @@ namespace IdentificationApp.Source
         {
             int sbj = currentSubjectRegistry;
             subjectRegistry = "sbj-" + sbj;
-            Directory.CreateDirectory(Path.Combine(BASE_DIR_Process, subjectRegistry));
+            Directory.CreateDirectory(Path.Combine(ProcessPath, subjectRegistry));
             currentSubjectRegistry += 1;
             return sbj;
         }
 
         public void CaptureImage(WriteableBitmap image, string imageType, int capture, bool identify)
         {
-            string filename = Path.Combine(BASE_DIR_Process, subjectRegistry, "cpt_" + capture + "_" + imageType + "_i.png");
+            string filename = Path.Combine(ProcessPath, subjectRegistry, "cpt_" + capture + "_" + imageType + "_i.png");
             if (identify)
             {
-                filename = Path.Combine(BASE_DIR_Identify, subjectIdentify, "cpt_" + capture + "_" + imageType + "_i.png");
+                filename = Path.Combine(IdentifyPath, subjectIdentify, "cpt_" + capture + "_" + imageType + "_i.png");
             }
             using (FileStream stream = new FileStream(filename, FileMode.Create))
             {
@@ -68,10 +68,10 @@ namespace IdentificationApp.Source
 
         public void CaptureData(ushort[] data, string dataType, int capture, int width, int height, bool identify)
         {
-            string filename = Path.Combine(BASE_DIR_Process, subjectRegistry, "cpt_" + capture + "_" + dataType + "_d.dat");
+            string filename = Path.Combine(ProcessPath, subjectRegistry, "cpt_" + capture + "_" + dataType + "_d.dat");
             if (identify)
             {
-                filename = Path.Combine(BASE_DIR_Identify, subjectIdentify, "cpt_" + capture + "_" + dataType + "_d.dat");
+                filename = Path.Combine(IdentifyPath, subjectIdentify, "cpt_" + capture + "_" + dataType + "_d.dat");
             }
             using (FileStream fs = File.Create(filename))
             {
@@ -93,7 +93,7 @@ namespace IdentificationApp.Source
 
         public BitmapImage GetIdentityBitmap(int subject, int capture)
         {
-            return new BitmapImage(new Uri(Path.Combine(BASE_DIR_Registry, "sbj-" + subject, "cpt_" + capture + "_color.png")));
+            return new BitmapImage(new Uri(Path.Combine(DatasetPath, "sbj-" + subject, "cpt_" + capture + "_color.png")));
         }
     }
 }

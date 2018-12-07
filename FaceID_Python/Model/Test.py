@@ -1,6 +1,6 @@
 import os, argparse
 from FaceID import FaceID
-from SampleGenerator import sample_dc, sample_ds
+from SampleGenerator import sample_dataset
 
 th = 0.5
 
@@ -12,7 +12,7 @@ if __name__ == "__main__":
     save_name = args['save']
 
     if not save_name:
-        save_name = 'model_weigths'
+        save_name = 'training'
 
     faceID = FaceID()
     faceID.load(save_name)
@@ -21,12 +21,12 @@ if __name__ == "__main__":
     correct_f = 0
 
     for i in range(50):
-        s = sample_dc(True, validation=True)
+        s = sample_dataset(True, faceID.dataset_path, 14)
         if faceID.predict(s, threshold=th):
             correct_v = correct_v + 1;
 
     for i in range(50):
-        s = sample_dc(False, validation=True)
+        s = sample_dataset(False, faceID.dataset_path, 14)
         if not faceID.predict(s, threshold=th):
             correct_f = correct_f + 1;
 
@@ -39,12 +39,12 @@ if __name__ == "__main__":
 
 
     for i in range(50):
-        s = sample_ds(True, validation=True)
+        s = sample_dataset(True, faceID.dataset_ds_path, 30)
         if faceID.predict(s, threshold=th):
             correct_v = correct_v + 1;
 
     for i in range(50):
-        s = sample_ds(False, validation=True)
+        s = sample_dataset(False, faceID.dataset_ds_path, 30)
         if not faceID.predict(s, threshold=th):
             correct_f = correct_f + 1;
 

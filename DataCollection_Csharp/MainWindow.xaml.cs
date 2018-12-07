@@ -265,6 +265,7 @@
             ImgReferenceBG.Visibility = Visibility.Collapsed;
             Timer.Visibility = Visibility.Collapsed;
             TimerBG.Visibility = Visibility.Collapsed;
+            TemplateImage.Visibility = Visibility.Visible;
 
             string[] fromGradient = { "#ffd52941", "#ffe45f42", "#ffee894c", "#fff6b061", "#fffcd581" };
             string[] toGradient = { "#ff1f719b", "#ff238aad", "#ff33a3bc", "#ff4cbcc9", "#ff6bd5d3" };

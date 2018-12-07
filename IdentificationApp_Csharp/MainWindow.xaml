@@ -6,8 +6,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         Title="Face Identification" 
         mc:Ignorable="d"
-        d:DesignWidth="1280"
-        d:DesignHeight="720"
+        d:DesignWidth="1920"
+        d:DesignHeight="1080"
         MinWidth="500"
         MinHeight="700"
         Closing="MainWindow_Closing"
@@ -49,19 +49,19 @@
     <k:KinectRegion x:Name="kinectRegion">
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="30" />
+                <RowDefinition Height="60" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="*" />
-                <RowDefinition Height="30" />
+                <RowDefinition Height="60" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="60"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="60"/>
             </Grid.ColumnDefinitions>
             <Canvas Name="BGCanvas" Visibility="Visible"
                 Grid.Column="0" Grid.ColumnSpan="6" Grid.Row="0" Grid.RowSpan="6"
@@ -75,7 +75,7 @@
                    Text="Hola!&#x0a;¿Ya me conoces?" />
             <TextBlock Name="SmallLabel" Visibility="Hidden"
                    Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="2"
-                   FontSize="32" FontWeight="Regular" Foreground="#FFF"
+                   FontSize="42" FontWeight="Regular" Foreground="#FFF"
                    TextAlignment="Center"
                    VerticalAlignment="Center" HorizontalAlignment="Center"
                    TextWrapping="Wrap" FontFamily="{StaticResource Monserrat}"
@@ -88,15 +88,15 @@
                 Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="4" Grid.RowSpan="3"
                 HorizontalAlignment="Center" VerticalAlignment="Center"
                 Source="{Binding ColorImageSource}" Stretch="Uniform" />
-            <Image Name="IdentityImage" Visibility="Visible"
-                Grid.Column="2" Grid.Row="1" Grid.ColumnSpan="2" Grid.RowSpan="1"
-                HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform" />
             <Image Name="TemplateImage" Visibility="Hidden"
                 Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="4" Grid.RowSpan="3"
                 HorizontalAlignment="Center" VerticalAlignment="Center"
                 Source="{StaticResource Alignment}" Stretch="Uniform" />
+            <Image Name="IdentityImage" Visibility="Hidden"
+                Grid.Column="2" Grid.Row="1" Grid.ColumnSpan="2" Grid.RowSpan="1"
+                HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform" />
             <Rectangle Name="ImgReferenceBG" Visibility="Hidden"
-                       Fill="#FFF" Width="200" Height="200"
+                       Fill="#FFF" Width="300" Height="300"
                        Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2" Grid.RowSpan="1"
                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
             <Image Name="ImgReference" Visibility="Hidden"
@@ -104,17 +104,17 @@
                    HorizontalAlignment="Center" VerticalAlignment="Center"
                    Source="{StaticResource Ref_1}" Stretch="Uniform" Margin="15"/>
             <Path Name="BottomPanel" Visibility="Hidden"
-                  Height="180" Width="880" Fill="#FFFFFF"
+                  Height="280" Width="1480" Fill="#FFFFFF"
                   Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="4">
                 <Path.Data>
                     <PathGeometry>
                         <PathGeometry.Figures>
-                            <PathFigure StartPoint="80,10">
+                            <PathFigure StartPoint="160,10">
                                 <PathFigure.Segments>
-                                    <LineSegment Point="800,10" />
-                                    <ArcSegment Point="805,165" Size="1,1" IsLargeArc="True" SweepDirection="Clockwise" />
-                                    <LineSegment Point="80, 165" />
-                                    <ArcSegment Point="80,10" Size="1,1" IsLargeArc="True" SweepDirection="Clockwise" />
+                                    <LineSegment Point="1320,10" />
+                                    <ArcSegment Point="1325,270" Size="1,1" IsLargeArc="True" SweepDirection="Clockwise" />
+                                    <LineSegment Point="160, 270" />
+                                    <ArcSegment Point="160,10" Size="1,1" IsLargeArc="True" SweepDirection="Clockwise" />
                                 </PathFigure.Segments>
                             </PathFigure>
                         </PathGeometry.Figures>
@@ -122,25 +122,25 @@
                 </Path.Data>
             </Path>
             <TextBlock Name="BottomPanelText" Visibility="Hidden"
-                       FontSize="32" FontWeight="Light" FontFamily="{StaticResource Monserrat}" Foreground="#000"
-                       Width="800" TextWrapping="Wrap" TextAlignment="Center"
+                       FontSize="52" FontWeight="Light" FontFamily="{StaticResource Monserrat}" Foreground="#000"
+                       TextWrapping="Wrap" TextAlignment="Center"
                        VerticalAlignment="Center" HorizontalAlignment="Center"
-                       Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="4"
-                       Text="Ubícate para que tu cabeza se alinee con la imagen. Presiona continuar cuando hayas terminado." />
+                       Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="4" Width="1300"
+                       Text="Ubícate para que tu cabeza se alinee con la imagen. Presiona continuar cuando hayas terminado."/>
             <Button Name="Button1" Visibility="Hidden"
                     Click="OnStartButton" Grid.Column="3" Grid.Row="3" Grid.ColumnSpan="2"
-                    Height="150" Width="350" Background="Transparent" BorderBrush="Transparent" Padding="0"
+                    Height="225" Width="550" Background="Transparent" BorderBrush="Transparent" Padding="0"
                     VerticalAlignment="Center" HorizontalAlignment="Center">
-                <Path Name="ButtonPath" Height="150" Width="350" Fill="{StaticResource BlueGradientBrush}">
+                <Path Name="ButtonPath" Height="225" Width="550" Fill="{StaticResource BlueGradientBrush}">
                     <Path.Data>
                         <PathGeometry>
                             <PathGeometry.Figures>
-                                <PathFigure StartPoint="80,10">
+                                <PathFigure StartPoint="110,10">
                                     <PathFigure.Segments>
-                                        <LineSegment Point="270,10" />
-                                        <ArcSegment Point="275,145" Size="1,1" IsLargeArc="True" SweepDirection="Clockwise" />
-                                        <LineSegment Point="80, 145" />
-                                        <ArcSegment Point="80,10" Size="1,1" IsLargeArc="True" SweepDirection="Clockwise" />
+                                        <LineSegment Point="440,10" />
+                                        <ArcSegment Point="445,215" Size="1,1" IsLargeArc="True" SweepDirection="Clockwise" />
+                                        <LineSegment Point="110,215" />
+                                        <ArcSegment Point="110,10" Size="1,1" IsLargeArc="True" SweepDirection="Clockwise" />
                                     </PathFigure.Segments>
                                 </PathFigure>
                             </PathGeometry.Figures>
@@ -149,24 +149,24 @@
                 </Path>
             </Button>
             <TextBlock Name="Button1Label" Visibility="Hidden"
-                       FontSize="52" FontWeight="Light" FontFamily="{StaticResource Monserrat}" Foreground="#FFF" 
+                       FontSize="82" FontWeight="Light" FontFamily="{StaticResource Monserrat}" Foreground="#FFF" 
                        VerticalAlignment="Center" HorizontalAlignment="Center"
                        Grid.Column="3" Grid.Row="3" Grid.ColumnSpan="2"
                        Text="Empezar" />
             <Button Name="Button2" Visibility="Hidden"
                     Click="OnNoButton" Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="2"
-                    Height="150" Width="350" Background="Transparent" BorderBrush="Transparent" Padding="0"
+                    Height="225" Width="550" Background="Transparent" BorderBrush="Transparent" Padding="0"
                     VerticalAlignment="Center" HorizontalAlignment="Center">
-                <Path Name="Button2Path" Height="150" Width="350" Fill="{StaticResource BlueGradientBrush}">
+                <Path Name="Button2Path" Height="225" Width="550" Fill="{StaticResource BlueGradientBrush}">
                     <Path.Data>
                         <PathGeometry>
                             <PathGeometry.Figures>
-                                <PathFigure StartPoint="80,10">
+                                <PathFigure StartPoint="110,10">
                                     <PathFigure.Segments>
-                                        <LineSegment Point="270,10" />
-                                        <ArcSegment Point="275,145" Size="1,1" IsLargeArc="True" SweepDirection="Clockwise" />
-                                        <LineSegment Point="80, 145" />
-                                        <ArcSegment Point="80,10" Size="1,1" IsLargeArc="True" SweepDirection="Clockwise" />
+                                        <LineSegment Point="440,10" />
+                                        <ArcSegment Point="445,215" Size="1,1" IsLargeArc="True" SweepDirection="Clockwise" />
+                                        <LineSegment Point="110,215" />
+                                        <ArcSegment Point="110,10" Size="1,1" IsLargeArc="True" SweepDirection="Clockwise" />
                                     </PathFigure.Segments>
                                 </PathFigure>
                             </PathGeometry.Figures>
@@ -175,10 +175,10 @@
                 </Path>
             </Button>
             <TextBlock Name="Button2Label" Visibility="Hidden"
-                       FontSize="52" FontWeight="Light" FontFamily="{StaticResource Monserrat}" Foreground="#FFF" 
+                       FontSize="82" FontWeight="Light" FontFamily="{StaticResource Monserrat}" Foreground="#FFF" 
                        VerticalAlignment="Center" HorizontalAlignment="Center"
                        Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="2"
-                       Text="Empezar" />
+                       Text="No" />
             <Rectangle Name="FlashRect" Visibility="Visible"
                        Opacity="0" Fill="#FFF"
                        Grid.Column="0" Grid.ColumnSpan="6"

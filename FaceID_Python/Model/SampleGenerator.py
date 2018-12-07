@@ -2,69 +2,38 @@ import random, os
 import numpy as np
 from PIL import Image
 
-def sample_both(correct, validation=False):
+def sample(correct, subjects, paths):
     if random.random() < 0.5:
-        return sample_dc(correct, validation=validation)
+        return sample_dataset(correct, paths[0], subjects)
     else:
-        return sample_ds(correct, validation=validation)
+        return sample_dataset(correct, paths[1], 30)
 
-def sample_dc(positive, subjects, validation=False):
+def sample_dataset(positive, folder, subjects):
     sbj1 = random.randint(0, subjects)
     sbj2 = random.randint(0, subjects)
     while sbj1 == sbj2:
         sbj2 = random.randint(0, subjects)
-    no1 = random.randint(0, 8)
-    no2 = random.randint(0, 8)
+    no1 = random.randint(0, subjects)
+    no2 = random.randint(0, subjects)
     while no1 == no2:
-        no2 = random.randint(0, 8)
-
-    if validation:
-        no1 = 0
-        no2 = random.randint(1, 8)
+        no2 = random.randint(0, subjects)
 
     if positive:
         sbj2 = sbj1
 
-    sample1 = getGDII(sbj1, no1)
-    sample2 = getGDII(sbj2, no2)
+    sample1 = getRGBD(sbj1, no1, folder)
+    sample2 = getRGBD(sbj2, no2, folder)
 
     if sample1 is None or sample2 is None:
-        return sample_dc(positive, validation=validation)
+        return sample_dataset(positive, folder, subjects)
 
     return np.array([sample1, sample2])
 
-def sample_ds(positive, validation=False):
-    sbj1 = random.randint(0, 30)
-    sbj2 = random.randint(0, 30)
-    while sbj1 == sbj2:
-        sbj2 = random.randint(0, 30)
-    no1 = random.randint(1, 17)
-    no2 = random.randint(1, 17)
-    while no1 == no2:
-        no2 = random.randint(1, 17)
-
-    if validation:
-        sbj1 = random.randint(26, 30)
-        sbj2 = random.randint(26, 30)
-        while sbj1 == sbj2:
-            sbj2 = random.randint(26, 30)
-
-    if positive:
-        sbj2 = sbj1
-
-    sample1 = getRGBD(sbj1, no1, dataset='DS')
-    sample2 = getRGBD(sbj2, no2, dataset='DS')
-
-    if sample1 is None or sample2 is None:
-        return sample_ds(positive, validation=validation)
-
-    return np.array([sample1, sample2])
-
-def getRGBD(sbjNo, imgNo, dataset='DC', channel='depth'):
-    color = get_color(sbjNo, imgNo, dataset)
+def getRGBD(sbjNo, imgNo, folder):
+    color = get_color(sbjNo, imgNo, folder)
     if color is None:
         return None
-    depth = get_channel(sbjNo, imgNo, dataset, channel=channel)
+    depth = get_channel(sbjNo, imgNo, folder)
 
     rgbd = np.zeros((100,100,4))
     rgbd[:,:,:3] = color[:,:,:3]
@@ -72,13 +41,13 @@ def getRGBD(sbjNo, imgNo, dataset='DC', channel='depth'):
 
     return rgbd
 
-def getGDII(sbjNo, imgNo):
-    color = get_channel(sbjNo, imgNo, 'DC', channel='color')
+def getGDII(sbjNo, imgNo, folder):
+    color = get_channel(sbjNo, imgNo, folder, channel='color')
     if color is None:
         return None
-    depth = get_channel(sbjNo, imgNo, 'DC', channel='depth')
-    infrared = get_channel(sbjNo, imgNo, 'DC', channel='infrared')
-    index = get_channel(sbjNo, imgNo, 'DC', channel='index')
+    depth = get_channel(sbjNo, imgNo, folder, channel='depth')
+    infrared = get_channel(sbjNo, imgNo, folder, channel='infrared')
+    index = get_channel(sbjNo, imgNo, folder, channel='index')
 
     gdii = np.zeros((100,100,4))
     gdii[:,:,0] = color
@@ -88,39 +57,22 @@ def getGDII(sbjNo, imgNo):
 
     return gdii
 
-def get_color(sbjNo, imgNo, dataset):
-    file = os.path.join(os.path.dirname(__file__), 'data', dataset, 'sbj-'+str(sbjNo), 'cpt_'+str(imgNo)+'_color.png')
-    if dataset == 'IR':
-        file = os.path.join(img_repo_path, 'sbj-'+str(sbjNo), 'cpt_'+str(imgNo)+'_color.png')
-
+def get_color(sbjNo, imgNo, folder):
+    file = os.path.join(folder, 'sbj-'+str(sbjNo), 'cpt_'+str(imgNo)+'_color.png')
     try:
         color = Image.open(file)
         return np.asarray(color)
     except:
         return None
 
-def get_channel(sbjNo, imgNo, dataset, channel='depth', normalize=False):
-    file = os.path.join(os.path.dirname(__file__), 'data', dataset, 'sbj-'+str(sbjNo), 'cpt_'+str(imgNo)+'_'+channel+'.png')
-    if dataset == 'IR':
-        file = os.path.join(img_repo_path, 'sbj-'+str(sbjNo), 'cpt_'+str(imgNo)+'_'+channel+'.png')
-
+def get_channel(sbjNo, imgNo, folder, channel='depth'):
+    file = os.path.join(folder, 'sbj-'+str(sbjNo), 'cpt_'+str(imgNo)+'_'+channel+'.png')
     try:
         img = Image.open(file)
         if (channel == 'color'):
             img = img.convert('L')
         else:
             img, _, _ = img.split()
-        img = np.asarray(img)
-        if normalize:
-            return normalize(img)
-        else:
-            return img
+        return np.asarray(img)
     except:
         return None
-
-def normalize(mat):
-    center = mat[50, 50]
-    for i in range(0,100):
-        for j in range(0,100):
-            mat[i, j] = mat[i, j] - center
-    return mat

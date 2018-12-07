@@ -19,10 +19,12 @@ def process_color(imgNo, dataset, in_path, out_path):
         color = color.resize((640,480), Image.LANCZOS)
         color = color.crop(box=(220, 120, 420, 320))
         color = color.resize((100,100), Image.LANCZOS)
+        color.save(os.path.join(out_path, 'cpt_'+str(imgNo-1)+'_color.png'))
     else:
         color = color.resize((718,404), Image.LANCZOS)
         color = color.crop(box=(309, 102, 409, 202))
-    color.save(os.path.join(out_path, 'cpt_'+str(imgNo)+'_color.png'))
+        color.save(os.path.join(out_path, 'cpt_'+str(imgNo)+'_color.png'))
+    print('   + Color file completed')
     return True
 
 def process_depth(imgNo, dataset, in_path, out_path):
@@ -63,10 +65,11 @@ def process_depth(imgNo, dataset, in_path, out_path):
     if dataset == 'DS':
         pil_image = pil_image.crop(box=(220, 120, 420, 320))
         pil_image = pil_image.resize((100,100), Image.LANCZOS)
+        pil_image.save(os.path.join(out_path, 'cpt_'+str(imgNo-1)+'_depth.png'))
     else:
         pil_image = pil_image.crop(box=(190, 102, 290, 202))
-
-    pil_image.save(os.path.join(out_path, 'cpt_'+str(imgNo)+'_depth.png'))
+        pil_image.save(os.path.join(out_path, 'cpt_'+str(imgNo)+'_depth.png'))
+    print('   + Depth file completed')
 
 def lerp(val):
     return float((val-400)/(3000-400))
@@ -78,6 +81,7 @@ def process_infrared(imgNo, in_path, out_path):
     infrared = infrared.crop(box=(190, 102, 290, 202))
 
     infrared.save(os.path.join(out_path, 'cpt_'+str(imgNo)+'_infrared.png'))
+    print('   + Infrared file completed')
 
 def process_index(imgNo, in_path, out_path):
     file = os.path.join(in_path, 'cpt_'+str(imgNo)+'_index_i.png')
@@ -86,6 +90,7 @@ def process_index(imgNo, in_path, out_path):
     index = index.crop(box=(190, 102, 290, 202))
 
     index.save(os.path.join(out_path, 'cpt_'+str(imgNo)+'_index.png'))
+    print('   + Index file completed')
 
 def preprocess(in_path, out_path, dataset, imgNo):
     if not os.path.exists(out_path):
