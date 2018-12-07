@@ -26,7 +26,7 @@ namespace IdentificationApp.Source
         private readonly ushort[] depthData = null;
 
         private readonly WriteableBitmap infraredBitmap = null;
-        private readonly byte[] infraredBuffer= null;
+        private readonly byte[] infraredBuffer = null;
         private readonly ushort[] infraredData = null;
 
         private readonly WriteableBitmap indexBitmap = null;
@@ -291,7 +291,7 @@ namespace IdentificationApp.Source
 
             this.indexBitmap.WritePixels(new Int32Rect(0, 0, width, height), indexBuffer, stride, 0);
         }
-      
+
         private static Body FindBodyWithTrackingId(BodyFrame bodyFrame, ulong trackingId)
         {
             Body result = null;

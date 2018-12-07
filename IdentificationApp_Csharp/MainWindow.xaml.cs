@@ -2,21 +2,13 @@
 using IdentificationApp.Source;
 using Microsoft.Kinect.Wpf.Controls;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace IdentificationApp
 {
@@ -28,7 +20,7 @@ namespace IdentificationApp
         private KinectManager kinect = null;
         private DataCapture capture = null;
         private FaceID faceId = null;
-        private IdentifyCallback callback;
+        private TrainingUpdater trainingUpdater;
 
         private Storyboard flashAnimation;
 
@@ -40,7 +32,7 @@ namespace IdentificationApp
         bool fullScreen = false;
         bool waitingToReturn = false;
 
-        private enum CaptureStage
+        public enum CaptureStage
         {
             Idle,
             Tracking,
@@ -62,8 +54,8 @@ namespace IdentificationApp
         {
             kinect = new KinectManager();
             capture = new DataCapture();
-            faceId = new FaceID();
-            callback = new IdentifyCallback(this);
+            faceId = new FaceID(this);
+            trainingUpdater = new TrainingUpdater(this);
 
             rnd = new Random();
 
@@ -77,6 +69,11 @@ namespace IdentificationApp
             this.InitializeComponent();
 
             Mouse.OverrideCursor = Cursors.None;
+        }
+
+        public CaptureStage GetStage()
+        {
+            return stage;
         }
 
         private void OnButtonKeyDown(object sender, KeyEventArgs e)
@@ -138,7 +135,7 @@ namespace IdentificationApp
                 MainLabel.Text = "Identificando...";
                 int sbj = capture.NewSubjectIdentify();
                 CaptureData(0, true);
-                faceId.Identify(sbj, callback);
+                faceId.Identify(sbj);
                 TemplateImage.Visibility = Visibility.Collapsed;
                 VideoCapture.Visibility = Visibility.Collapsed;
                 BottomPanel.Visibility = Visibility.Collapsed;
@@ -300,7 +297,7 @@ namespace IdentificationApp
             BottomPanelText.Text = "Ubícate para que tu cabeza se alinee con la imagen. Presiona continuar cuando hayas terminado.";
             SmallLabel.Text = "Levanta tu mano y presiona el boton para empezar.";
             SmallLabel.Visibility = Visibility.Collapsed;
-            MainLabel.Text = "¿Quieres ayudar a crear un algoritmo de identificación facial?";
+            MainLabel.Text = "Hola!\n¿Ya me conoces?";
             MainLabel.Visibility = Visibility.Visible;
             VideoCapture.Visibility = Visibility.Collapsed;
             TemplateImage.Visibility = Visibility.Visible;
@@ -368,6 +365,7 @@ namespace IdentificationApp
                 else if (currentCapture == 9 && stage == CaptureStage.RegisterCaptures)
                 {
                     stage = CaptureStage.End;
+                    trainingUpdater.CheckForUpdate();
                     faceId.Process(subjectToProcess);
                     VideoCapture.Visibility = Visibility.Collapsed;
                     ImgReference.Visibility = Visibility.Collapsed;
@@ -406,38 +404,38 @@ namespace IdentificationApp
 
         public void Matched(int subject)
         {
+            this.Dispatcher.Invoke(() =>
+            {
+            });
             if (stage == CaptureStage.Identify)
             {
-                this.Dispatcher.Invoke(() =>
-                {
-                    stage = CaptureStage.Matched;
-                    IdentityImage.Source = capture.GetIdentityBitmap(subject, 0);
-                    IdentityImage.Visibility = Visibility.Visible;
-                    MainLabel.Visibility = Visibility.Collapsed;
-                    Button1Label.Text = "Si";
-                    Button1Label.Visibility = Visibility.Visible;
-                    Button1.Visibility = Visibility.Visible;
-                    Button2Label.Text = "No";
-                    Button2Label.Visibility = Visibility.Visible;
-                    Button2.Visibility = Visibility.Visible;
-                    BottomPanel.Visibility = Visibility.Visible;
-                    BottomPanelText.Visibility = Visibility.Visible;
-                    BottomPanelText.Text = "Pienso que ya te conozco. ¿Eres tu la persona de esta foto?";
-                    BottomPanel.SetValue(Grid.RowProperty, 2);
-                    BottomPanelText.SetValue(Grid.RowProperty, 2);
-                    Button1Label.SetValue(Grid.RowProperty, 3);
-                    Button1.SetValue(Grid.RowProperty, 3);
-                    Button2Label.SetValue(Grid.RowProperty, 3);
-                    Button2.SetValue(Grid.RowProperty, 3);
-                });
+                stage = CaptureStage.Matched;
+                IdentityImage.Source = capture.GetIdentityBitmap(subject, 0);
+                IdentityImage.Visibility = Visibility.Visible;
+                MainLabel.Visibility = Visibility.Collapsed;
+                Button1Label.Text = "Si";
+                Button1Label.Visibility = Visibility.Visible;
+                Button1.Visibility = Visibility.Visible;
+                Button2Label.Text = "No";
+                Button2Label.Visibility = Visibility.Visible;
+                Button2.Visibility = Visibility.Visible;
+                BottomPanel.Visibility = Visibility.Visible;
+                BottomPanelText.Visibility = Visibility.Visible;
+                BottomPanelText.Text = "Pienso que ya te conozco. ¿Eres tu la persona de esta foto?";
+                BottomPanel.SetValue(Grid.RowProperty, 2);
+                BottomPanelText.SetValue(Grid.RowProperty, 2);
+                Button1Label.SetValue(Grid.RowProperty, 3);
+                Button1.SetValue(Grid.RowProperty, 3);
+                Button2Label.SetValue(Grid.RowProperty, 3);
+                Button2.SetValue(Grid.RowProperty, 3);
             }
         }
 
         public void FirstTime()
         {
-            if (stage == CaptureStage.Identify)
+            this.Dispatcher.Invoke(() =>
             {
-                this.Dispatcher.Invoke(() =>
+                if (stage == CaptureStage.Identify)
                 {
                     stage = CaptureStage.FirstTime;
                     MainLabel.Text = "Eres nuevo";
@@ -456,28 +454,27 @@ namespace IdentificationApp
                     Button1.SetValue(Grid.RowProperty, 3);
                     Button2Label.SetValue(Grid.RowProperty, 3);
                     Button2.SetValue(Grid.RowProperty, 3);
-                });
-            }
+                }
+            });
         }
 
-        public class IdentifyCallback : IFaceIDCallback
+        public void StartTraining()
         {
-            public MainWindow main;
-
-            public IdentifyCallback(MainWindow from)
+            Dispatcher.Invoke(() =>
             {
-                main = from;
-            }
+                stage = CaptureStage.Training;
+                MainLabel.Text = "Training...";
+                faceId.Train();
+            });
+        }
 
-            public void Match(int subject)
+        public void EndTraining()
+        {
+            Dispatcher.Invoke(() =>
             {
-                main.Matched(subject);
-            }
-
-            public void FirstTime()
-            {
-                main.FirstTime();
-            }
+                stage = CaptureStage.Idle;
+                MainLabel.Text = "Hola!\n¿Ya me conoces?";
+            });
         }
     }
 }

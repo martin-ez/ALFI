@@ -1,5 +1,4 @@
 ﻿using RestSharp;
-using System;
 
 namespace IdentificationApp.Source
 {
@@ -9,24 +8,20 @@ namespace IdentificationApp.Source
         public int Identity { get; set; }
     }
 
-    public interface IFaceIDCallback
-    {
-        void Match(int subject);
-        void FirstTime();
-    }
-
     class FaceID
     {
         private const string URL = "http://127.0.0.1:5000/";
 
+        private MainWindow main;
         private RestClient client;
 
-        public FaceID()
+        public FaceID(MainWindow main)
         {
+            this.main = main;
             client = new RestClient(URL);
         }
 
-        public void Identify(int subject, IFaceIDCallback callback)
+        public void Identify(int subject)
         {
             var request = new RestRequest("id", Method.GET);
             request.AddParameter("subject", subject);
@@ -35,8 +30,8 @@ namespace IdentificationApp.Source
             {
                 if (response.Data != null)
                 {
-                    if (response.Data.Match) callback.Match(response.Data.Identity);
-                    else callback.FirstTime();
+                    if (response.Data.Match) main.Matched(response.Data.Identity);
+                    else main.FirstTime();
                 }
             });
         }
@@ -57,8 +52,7 @@ namespace IdentificationApp.Source
             var request = new RestRequest("train", Method.GET);
             var asyncHandle = client.ExecuteAsync<FaceIDResponse>(request, response =>
             {
-                //TODO Wait for end
-                return;
+                main.EndTraining();
             });
         }
     }

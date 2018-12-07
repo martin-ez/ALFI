@@ -71,6 +71,7 @@
     <Compile Include="Source\DataCapture.cs" />
     <Compile Include="Source\KinectManager.cs" />
     <Compile Include="Source\FaceID.cs" />
+    <Compile Include="Source\TrainingUpdater.cs" />
     <Page Include="HandPointers\HandPointerStyles.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
