@@ -464,8 +464,8 @@ namespace IdentificationApp
             {
                 stage = CaptureStage.Training;
                 MainLabel.Text = "Training...";
-                faceId.Train();
             });
+            faceId.Train();
         }
 
         public void EndTraining()

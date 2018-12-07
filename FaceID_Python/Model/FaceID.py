@@ -7,6 +7,7 @@ from tensorflow.train import AdamOptimizer as Adam
 from tensorflow.keras.regularizers import l2
 from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras import backend as K
+from tensorflow import Graph, Session
 import numpy as np
 from SampleGenerator import sample
 import csv, os
@@ -107,7 +108,6 @@ def generator(batch_size, subjects, paths):
 class FaceID:
 
     def __init__(self):
-        self.model = faceIDNet()
         self.to_identify_path = os.path.join(os.path.abspath(os.sep), 'ALFI_Data','To_Identify', 'Raw')
         self.to_identify_processed_path = os.path.join(os.path.abspath(os.sep), 'ALFI_Data','To_Identify', 'Processed')
         self.to_process_path = os.path.join(os.path.abspath(os.sep), 'ALFI_Data','To_Process')
@@ -119,22 +119,34 @@ class FaceID:
         while(os.path.exists(os.path.join(self.dataset_path,'sbj-'+str(self.current_sbj)))):
             self.current_sbj = self.current_sbj + 1
 
+        self.graph = Graph()
+        with self.graph.as_default():
+            self.session = Session()
+            with self.session.as_default():
+                self.model = faceIDNet()
+
     def train(self, epochs, save_name):
-        gen = generator(24, self.current_sbj-1, [self.dataset_path, self.dataset_ds_path])
-        save_folder = os.path.join(self.weigths_path, save_name)
-        if not os.path.exists(save_folder):
-            os.makedirs(save_folder)
-        cp_callback = ModelCheckpoint( os.path.join(save_folder, 'faceID_weights'), save_weights_only=True)
-        self.model.fit_generator(gen, steps_per_epoch=30, epochs=epochs, validation_steps=20, callbacks=[cp_callback])
-        lossTrain = self.model.evaluate_generator(gen, steps=30)
-        print('* - Loss: '+str(lossTrain))
+        K.set_session(self.session)
+        with self.graph.as_default():
+            gen = generator(24, self.current_sbj-1, [self.dataset_path, self.dataset_ds_path])
+            save_folder = os.path.join(self.weigths_path, save_name)
+            if not os.path.exists(save_folder):
+                os.makedirs(save_folder)
+            cp_callback = ModelCheckpoint(os.path.join(save_folder, 'faceID_weights'), save_weights_only=True)
+            self.model.fit_generator(gen, steps_per_epoch=30, epochs=epochs, validation_steps=20, callbacks=[cp_callback])
+            lossTrain = self.model.evaluate_generator(gen, steps=30)
+            print('* - Loss: '+str(lossTrain))
 
     def predict(self, inputs, threshold=0.2):
-        inputs = [inputs[0,:].reshape((1,100,100,4)), inputs[1,:].reshape((1,100,100,4))]
-        out = self.model.predict(inputs)
-        return (out <= threshold)
+        K.set_session(self.session)
+        with self.graph.as_default():
+            inputs = [inputs[0,:].reshape((1,100,100,4)), inputs[1,:].reshape((1,100,100,4))]
+            out = self.model.predict(inputs)
+            return (out <= threshold)
 
     def load(self, save_name):
-        self.model.load_weights(os.path.join(self.weigths_path, save_name, 'faceID_weights'))
-        self.model._make_predict_function()
-        print('--- Weights loaded ---')
+        K.set_session(self.session)
+        with self.graph.as_default():
+            self.model.load_weights(os.path.join(self.weigths_path, save_name, 'faceID_weights'))
+            self.model._make_predict_function()
+            print('--- Weights loaded ---')
