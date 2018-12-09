@@ -51,4 +51,3 @@ Run the `IdentificationApp.exe` executable, found on the `IdentificationApp` fol
 
 You should see the Kinect sensor turning on, and standing in front of it should prompt the screen to change from blue to orange.
 ___
-## Usage
