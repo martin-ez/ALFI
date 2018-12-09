@@ -68,6 +68,7 @@
       <Generator>MSBuild:Compile</Generator>
     </ApplicationDefinition>
     <Compile Include="Animations\UIAnimations.cs" />
+    <Compile Include="Source\Results.cs" />
     <Compile Include="Source\DataCapture.cs" />
     <Compile Include="Source\KinectManager.cs" />
     <Compile Include="Source\FaceID.cs" />

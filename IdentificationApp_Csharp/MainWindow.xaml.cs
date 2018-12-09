@@ -21,6 +21,7 @@ namespace IdentificationApp
         private DataCapture capture = null;
         private FaceID faceId = null;
         private TrainingUpdater trainingUpdater;
+        private Results results;
 
         private Storyboard flashAnimation;
 
@@ -56,6 +57,7 @@ namespace IdentificationApp
             capture = new DataCapture();
             faceId = new FaceID(this);
             trainingUpdater = new TrainingUpdater(this);
+            results = new Results();
 
             rnd = new Random();
 
@@ -146,6 +148,7 @@ namespace IdentificationApp
             else if (stage == CaptureStage.Matched)
             {
                 stage = CaptureStage.End;
+                results.Mark(true, true);
                 IdentityImage.Visibility = Visibility.Collapsed;
                 MainLabel.Visibility = Visibility.Visible;
                 MainLabel.Text = "Genial!";
@@ -161,6 +164,7 @@ namespace IdentificationApp
             }
             else if (stage == CaptureStage.FirstTime)
             {
+                results.Mark(false, true);
                 AskToRegister();
             }
             else if (stage == CaptureStage.Register)
@@ -204,6 +208,7 @@ namespace IdentificationApp
             if (stage == CaptureStage.Matched)
             {
                 stage = CaptureStage.BadMatch;
+                results.Mark(true, false);
                 IdentityImage.Visibility = Visibility.Collapsed;
                 MainLabel.Visibility = Visibility.Visible;
                 MainLabel.Text = "Perdon por confundirte. ¿Es la primera vez que te veo?";
@@ -229,6 +234,7 @@ namespace IdentificationApp
             else if (stage == CaptureStage.FirstTime || stage == CaptureStage.BadMatch)
             {
                 stage = CaptureStage.End;
+                if (stage == CaptureStage.FirstTime) results.Mark(false, false);
                 MainLabel.Visibility = Visibility.Visible;
                 MainLabel.Text = "Lo siento :(";
                 Button1Label.Visibility = Visibility.Collapsed;
@@ -241,11 +247,6 @@ namespace IdentificationApp
                 BottomPanel.SetValue(Grid.RowProperty, 3);
                 BottomPanelText.SetValue(Grid.RowProperty, 3);
             }
-        }
-
-        private void MainWindow_Closing(object sender, CancelEventArgs e)
-        {
-            kinect.CloseReaders();
         }
 
         private void PersonEnter()
@@ -475,6 +476,12 @@ namespace IdentificationApp
                 stage = CaptureStage.Idle;
                 MainLabel.Text = "Hola!\n¿Ya me conoces?";
             });
+        }
+
+        private void MainWindow_Closing(object sender, CancelEventArgs e)
+        {
+            results.WriteFile();
+            kinect.CloseReaders();
         }
     }
 }
