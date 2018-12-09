@@ -4,12 +4,11 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-tensorflow-gpu = "*"
+tensorflow = "*"
 flask = "*"
 flask-restful = "*"
 flask-cors = "*"
-pillow = "*"
-gunicorn = "*"
+pillow = "==5.2.0"
 
 [dev-packages]
 
