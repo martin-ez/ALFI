@@ -28,7 +28,7 @@ $ python -m pip install pipenv
 ```
 $ pipenv install
 ```
-![pipenv install process](docs/ALFI_Install_1.gif)
+![pipenv install process](https://raw.githubusercontent.com/sebastian-mc/ALFI/master/Docs/ALFI_Install_1.gif)
 
 (This process may take several minutes)
 
@@ -38,7 +38,7 @@ $ pipenv run python App.py
 ```
 You should see the console display the following:
 
-![Running the server](docs/ALFI_Install_2.png)
+![Running the server](https://raw.githubusercontent.com/sebastian-mc/ALFI/master/Docs/ALFI_Install_2.png)
 
 The FaceID server is ready.
 ### Kinect Setup
