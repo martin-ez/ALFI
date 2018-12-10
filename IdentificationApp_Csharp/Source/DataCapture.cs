@@ -6,7 +6,7 @@ namespace IdentificationApp.Source
 {
     class DataCapture
     {
-        private static readonly string IdentifyPath = Path.Combine(Path.GetPathRoot(Environment.CurrentDirectory), "ALFI_Data", "To_Identify");
+        private static readonly string IdentifyPath = Path.Combine(Path.GetPathRoot(Environment.CurrentDirectory), "ALFI_Data", "To_Identify", "Raw");
         private static readonly string ProcessPath = Path.Combine(Path.GetPathRoot(Environment.CurrentDirectory), "ALFI_Data", "To_Process");
         private static readonly string DatasetPath = Path.Combine(Path.GetPathRoot(Environment.CurrentDirectory), "ALFI_Data", "Dataset", "DC");
         private string subjectIdentify;

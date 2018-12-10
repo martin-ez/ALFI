@@ -43,7 +43,7 @@ class Identify(Resource):
             next = False
             capture = 0
             while not next:
-                other = getRGBD(current, capture, registry_path)
+                other = getRGBD(current, capture, faceID.dataset_path)
                 if other is None:
                     next = True
                 else:

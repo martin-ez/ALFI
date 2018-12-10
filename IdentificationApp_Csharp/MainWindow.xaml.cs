@@ -301,7 +301,7 @@ namespace IdentificationApp
             MainLabel.Text = "Hola!\n¿Ya me conoces?";
             MainLabel.Visibility = Visibility.Visible;
             VideoCapture.Visibility = Visibility.Collapsed;
-            TemplateImage.Visibility = Visibility.Visible;
+            TemplateImage.Visibility = Visibility.Collapsed;
             IdentityImage.Visibility = Visibility.Collapsed;
             ImgReference.Visibility = Visibility.Collapsed;
             ImgReferenceBG.Visibility = Visibility.Collapsed;
@@ -407,29 +407,29 @@ namespace IdentificationApp
         {
             this.Dispatcher.Invoke(() =>
             {
-            });
-            if (stage == CaptureStage.Identify)
-            {
-                stage = CaptureStage.Matched;
-                IdentityImage.Source = capture.GetIdentityBitmap(subject, 0);
-                IdentityImage.Visibility = Visibility.Visible;
-                MainLabel.Visibility = Visibility.Collapsed;
-                Button1Label.Text = "Si";
-                Button1Label.Visibility = Visibility.Visible;
-                Button1.Visibility = Visibility.Visible;
-                Button2Label.Text = "No";
-                Button2Label.Visibility = Visibility.Visible;
-                Button2.Visibility = Visibility.Visible;
-                BottomPanel.Visibility = Visibility.Visible;
-                BottomPanelText.Visibility = Visibility.Visible;
-                BottomPanelText.Text = "Pienso que ya te conozco. ¿Eres tu la persona de esta foto?";
-                BottomPanel.SetValue(Grid.RowProperty, 2);
-                BottomPanelText.SetValue(Grid.RowProperty, 2);
-                Button1Label.SetValue(Grid.RowProperty, 3);
-                Button1.SetValue(Grid.RowProperty, 3);
-                Button2Label.SetValue(Grid.RowProperty, 3);
-                Button2.SetValue(Grid.RowProperty, 3);
-            }
+                if (stage == CaptureStage.Identify)
+                {
+                    stage = CaptureStage.Matched;
+                    IdentityImage.Source = capture.GetIdentityBitmap(subject, 0);
+                    IdentityImage.Visibility = Visibility.Visible;
+                    MainLabel.Visibility = Visibility.Collapsed;
+                    Button1Label.Text = "Si";
+                    Button1Label.Visibility = Visibility.Visible;
+                    Button1.Visibility = Visibility.Visible;
+                    Button2Label.Text = "No";
+                    Button2Label.Visibility = Visibility.Visible;
+                    Button2.Visibility = Visibility.Visible;
+                    BottomPanel.Visibility = Visibility.Visible;
+                    BottomPanelText.Visibility = Visibility.Visible;
+                    BottomPanelText.Text = "Pienso que ya te conozco. ¿Eres tu la persona de esta foto?";
+                    BottomPanel.SetValue(Grid.RowProperty, 2);
+                    BottomPanelText.SetValue(Grid.RowProperty, 2);
+                    Button1Label.SetValue(Grid.RowProperty, 3);
+                    Button1.SetValue(Grid.RowProperty, 3);
+                    Button2Label.SetValue(Grid.RowProperty, 3);
+                    Button2.SetValue(Grid.RowProperty, 3);
+                }
+            });      
         }
 
         public void FirstTime()
