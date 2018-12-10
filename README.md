@@ -41,6 +41,21 @@ You should see the console display the following:
 ![Running the server](https://raw.githubusercontent.com/sebastian-mc/ALFI/master/Docs/ALFI_Install_2.png)
 
 The FaceID server is ready.
+### (Optional) Setup GPU computation
+If a CUDA-compatible graphics processor card is available in the machine, you can setup Tensorflow to use it in the computation of the machine learning algorithms. This will reduce training times significantly.
+1. Stop the server amd remove Tensorflow from the environment.
+```
+$ pipenv uninstall tensorflow
+```
+2. Add the GPU ready distribution of Tensorflow to the environment.
+```
+$ pipenv install tensorflow-gpu
+```
+3. Run the server again.
+```
+$ pipenv run python App.py
+```
+Tensorflow will engage the available GPU and do processor heavy operations using it.
 ### Kinect Setup
 Due to the way the existing images in the dataset were taken, the Kinect needs to be place in a specific way in order for the app to work optimally.
 - The sensor must be on the bottom of the screen, pointing slightly upwards.
@@ -50,4 +65,12 @@ Due to the way the existing images in the dataset were taken, the Kinect needs t
 Run the `IdentificationApp.exe` executable, found on the `IdentificationApp` folder on the unzip project.
 
 You should see the Kinect sensor turning on, and standing in front of it should prompt the screen to change from blue to orange.
+___
+## Compilation
+1. Clone or download the [repository](https://github.com/sebastian-mc/ALFI).
+2. Open the project solution double-clicking `ALFI.sln`.
+3. In the top menu bar, change the Solution Configuration to Release, and the Solution Platform to Any CPU.
+4. Go to Build -> Build Solution, or Ctrl+Shift+B.
+
+The resulting executable and the additional files needed will be located in `IdentificationApp_Csharp\bin\Release`.
 ___

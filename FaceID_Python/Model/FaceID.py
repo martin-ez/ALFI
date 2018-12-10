@@ -88,17 +88,17 @@ def faceIDNet():
 
     return model_final
 
-def generator(batch_size, subjects, paths):
+def generator(batch_size, path):
     while 1:
         x=[]
         y=[]
         switch=True
         for _ in range(batch_size):
             if switch:
-                x.append(sample(True, subjects, paths))
+                x.append(sample(True, path))
                 y.append(np.array([0.]))
             else:
-                x.append(sample(False, subjects, paths))
+                x.append(sample(False, path))
                 y.append(np.array([1.]))
             switch=not switch
         x = np.asarray(x)
@@ -125,10 +125,12 @@ class FaceID:
             with self.session.as_default():
                 self.model = faceIDNet()
 
-    def train(self, epochs, save_name):
+    def train(self, epochs, save_name, load=False):
+        if load:
+            self.load(save_name)
         K.set_session(self.session)
         with self.graph.as_default():
-            gen = generator(24, self.current_sbj-1, [self.dataset_path, self.dataset_ds_path])
+            gen = generator(24, self.dataset_ds_path)
             save_folder = os.path.join(self.weigths_path, save_name)
             if not os.path.exists(save_folder):
                 os.makedirs(save_folder)

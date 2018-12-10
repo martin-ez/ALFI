@@ -2,7 +2,10 @@ import random, os
 import numpy as np
 from PIL import Image
 
-def sample(correct, subjects, paths):
+def sample(correct, path):
+    return sample_dataset(correct, path, 30)
+
+def sample_both(correct, subjects, paths):
     if random.random() < 0.5:
         return sample_dataset(correct, paths[0], subjects)
     else:
